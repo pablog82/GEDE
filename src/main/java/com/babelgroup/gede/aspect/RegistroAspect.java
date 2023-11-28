@@ -10,7 +10,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Component
 @Aspect
-@Log4j2
+//@Log4j2
 public class RegistroAspect {
 
 	@Autowired
@@ -23,10 +23,10 @@ public class RegistroAspect {
 				"SELECT count(*) FROM sqlite_master WHERE type='table' AND name='{registro}'", Integer.class);
 
 		if (count == 0) {
-			log.info("Inicializando la base de datos");
+//			log.info("Inicializando la base de datos");
 			jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS registro(id INTEGER PRIMARY KEY AUTOINCREMENT,"
 					+ "	expediente TEXT NOT NULL," + "	documento TEXT NOT NULL," + "	referenciaRepositorio TEXT,"
-					+ "	observaciones TEXT," + "	estado INTEGER)");
+					+ "	observaciones TEXT," + "	estado TEXT)");
 		}
 	}
 }

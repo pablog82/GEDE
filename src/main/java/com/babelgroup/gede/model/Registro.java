@@ -16,10 +16,10 @@ public class Registro {
 	private String documento;
 	private String referenciaRepositorio;
 	private String observaciones;
-	private Integer estado;
+	private String estado; //1. OK, 2. KO
 
 	public Registro(String expediente, String documento, String referenciaRepositorio, String observaciones,
-			Integer estado) {
+			String estado) {
 		super();
 		this.expediente = expediente;
 		this.documento = documento;

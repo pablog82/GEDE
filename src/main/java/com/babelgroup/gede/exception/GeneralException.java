@@ -16,6 +16,12 @@ public class GeneralException extends Exception {
 	/** The message. */
 	private final String message;
 
+	public GeneralException(Throwable cause) {
+		super(cause);
+		this.statusCode = 0;
+		this.message = cause.getMessage();
+	}
+
 	public GeneralException(String message, Throwable cause) {
 		super(message, cause);
 		this.statusCode = 0;
