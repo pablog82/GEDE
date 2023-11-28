@@ -1,0 +1,8 @@
+.mvn
+.settings
+.project
+.classpath
+.factorypath
+database/**
+expedientes/**
+target/**
