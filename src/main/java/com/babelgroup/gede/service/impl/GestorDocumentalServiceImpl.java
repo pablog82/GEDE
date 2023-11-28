@@ -272,7 +272,6 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		}
 
 		log.info("-- FIN DEL PROCESO DE DOCUMENTOS ---");
-
 	}
 
 	/**
