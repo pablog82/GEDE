@@ -93,23 +93,28 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		List<File> listadoDirectoriosExpedientes = null;
 
 		try {
+			log.info("PASO 1 - Listar carpetas de expedientes");
 			listadoDirectoriosExpedientes = listDirectories(dirExpedientes);
-			listadoDirectoriosExpedientes.forEach(System.out::println);
+//			listadoDirectoriosExpedientes.forEach(System.out::println);
+			log.info("-- Carpetas de expedientes encontradas: " + listadoDirectoriosExpedientes.toString());
 		} catch (IOException e) {
 			throw new GeneralException("Error al listar los expedientes", e);
 		}
 
 		// TODO 2. Leer fichero por carpetas
 		if (listadoDirectoriosExpedientes != null && !listadoDirectoriosExpedientes.isEmpty()) {
+			log.info("PASO 2 - Listar ficheros en cada carpeta");
 
 			for (File directorioExpediente : listadoDirectoriosExpedientes) {
 
 				String expediente = directorioExpediente.getName();
 
 				try {
+					log.info("PASO 3 - Listar ficheros en carpeta de expedientes: " + directorioExpediente);
 					List<File> listadoFicherosExpediente = listFiles(directorioExpediente.getAbsolutePath());
-					listadoFicherosExpediente.forEach(System.out::println);
+//					listadoFicherosExpediente.forEach(System.out::println);
 					if (listadoFicherosExpediente != null && !listadoFicherosExpediente.isEmpty()) {
+						log.info("-- Documentos de expedientes encontrados: " + listadoFicherosExpediente.toString());
 						for (File ficheroExpediente : listadoFicherosExpediente) {
 
 							String documento = ficheroExpediente.getName();
@@ -118,7 +123,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 							List<Registro> registros = registroService.findByExpedienteAndDocumento(expediente,
 									documento);
-							registros.forEach(System.out::println);
+//							registros.forEach(System.out::println);
 
 							// TODO Obtener el ticker
 							// obtenerTicket();
@@ -134,7 +139,8 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 								// TODO 4. Almacenar binario
 
-								//RespuestaGenerica respuestaAlmacenarBinario = almacenarBinario(ficheroExpediente);
+								// RespuestaGenerica respuestaAlmacenarBinario =
+								// almacenarBinario(ficheroExpediente);
 
 								// TODO 5. Crear documento
 
