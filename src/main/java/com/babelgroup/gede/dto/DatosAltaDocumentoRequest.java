@@ -21,5 +21,5 @@ public class DatosAltaDocumentoRequest {
 	private List<ValoresMetadato> metadatos;
 	private String identificadorBinario;// op
 	private String formatoBinario;
-
+	
 }

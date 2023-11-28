@@ -124,7 +124,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 							// obtenerTicket();
 
 //							getTiposDocumentales();
-							
+
 							if (!validarTicket()) {
 								obtenerTicket();
 								validarTicket();
@@ -134,7 +134,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 								// TODO 4. Almacenar binario
 
-								almacenarBinario(ficheroExpediente);
+								//RespuestaGenerica respuestaAlmacenarBinario = almacenarBinario(ficheroExpediente);
 
 								// TODO 5. Crear documento
 
@@ -196,22 +196,22 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 	private boolean validarTicket() {
 
-		if (this.ticketResponse != null && StringUtils.isNoneEmpty(this.ticketResponse.getTicket())) {
-
-			HttpHeaders headers = new HttpHeaders();
-			headers.set("Authorization", this.ticketResponse.getTicket());
-			headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
-			HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-
-			ResponseEntity<TicketResponse> response = restTemplate.exchange(gedeApiTicketValidar, HttpMethod.GET, requestEntity,
-					new ParameterizedTypeReference<TicketResponse>() {
-					});
-
-			if (HttpStatus.OK.equals(response.getStatusCode())) {
-				return true;
-			}
-		}
+//		if (this.ticketResponse != null && StringUtils.isNoneEmpty(this.ticketResponse.getTicket())) {
+//
+//			HttpHeaders headers = new HttpHeaders();
+//			headers.set("Authorization", this.ticketResponse.getTicket());
+//			headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+//
+//			HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+//
+//			ResponseEntity<TicketResponse> response = restTemplate.exchange(gedeApiTicketValidar, HttpMethod.GET, requestEntity,
+//					new ParameterizedTypeReference<TicketResponse>() {
+//					});
+//
+//			if (HttpStatus.OK.equals(response.getStatusCode())) {
+//				return true;
+//			}
+//		}
 		return false;
 	}
 
@@ -274,11 +274,12 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 					requestEntity, new ParameterizedTypeReference<RespuestaGenerica>() {
 					});
 
-			if (HttpStatus.OK.equals(response.getStatusCode())) {
+			if (HttpStatus.CREATED.equals(response.getStatusCode())) {
 				RespuestaGenerica generica = response.getBody();
 				log.info(generica);
 			} else {
 				// TODO
+				log.info(response);
 			}
 		} catch (IOException e) {
 			// TODO
