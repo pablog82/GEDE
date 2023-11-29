@@ -331,6 +331,9 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 		// si la fecha de caducidad del ticket que tenemos es pasado ya no sirve el
 		// ticker
+		if (this.ticketResponse == null) {
+			return false;
+		}
 		if (this.ticketResponse.getCaducidad().after(new Date())) {
 			return false;
 		}

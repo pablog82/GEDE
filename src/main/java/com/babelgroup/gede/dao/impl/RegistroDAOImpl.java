@@ -55,7 +55,7 @@ public class RegistroDAOImpl implements RegistroDAO {
 
 				(resultSet, rowNum) -> new Registro(resultSet.getInt("id"), resultSet.getString("expediente"),
 						resultSet.getString("documento"), resultSet.getString("referenciaRepositorio"),
-						resultSet.getString("observaciones"), resultSet.getInt("estado")));
+						resultSet.getString("observaciones"), resultSet.getString("estado")));
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class RegistroDAOImpl implements RegistroDAO {
 
 				(resultSet, rowNum) -> new Registro(resultSet.getInt("id"), resultSet.getString("expediente"),
 						resultSet.getString("documento"), resultSet.getString("referenciaRepositorio"),
-						resultSet.getString("observaciones"), resultSet.getInt("estado")));
+						resultSet.getString("observaciones"), resultSet.getString("estado")));
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class RegistroDAOImpl implements RegistroDAO {
 
 				(resultSet, rowNum) -> new Registro(resultSet.getInt("id"), resultSet.getString("expediente"),
 						resultSet.getString("documento"), resultSet.getString("referenciaRepositorio"),
-						resultSet.getString("observaciones"), resultSet.getInt("estado")));
+						resultSet.getString("observaciones"), resultSet.getString("estado")));
 	}
 
 	@Override
