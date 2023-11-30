@@ -8,6 +8,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.web.client.RestTemplate;
@@ -19,6 +21,12 @@ import com.babelgroup.gede.service.RegistroService;
  * The Class GedeApplication.
  */
 @SpringBootApplication
+@PropertySources({
+    @PropertySource("classpath:application.properties"),
+    @PropertySource("classpath:database.properties"),
+    @PropertySource("classpath:afirma.properties"),
+    @PropertySource("classpath:gede.properties")
+})
 public class GedeApplication implements CommandLineRunner {
 
 	/** The env. */
