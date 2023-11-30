@@ -45,12 +45,6 @@ import lombok.extern.log4j.Log4j2;
  * The Class GestorDocumentalServiceImpl.
  */
 @Service
-
-/** The Constant log. */
-
-/** The Constant log. */
-
-/** The Constant log. */
 @Log4j2
 public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
@@ -112,6 +106,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	@Value("${gede.api.documentos.cerrar}")
 	private String gedeApiDocumentosCerrar;
 
+	/** The fase. */
 	@Value("${fase}")
 	private Integer fase;
 
@@ -304,7 +299,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 		if (HttpStatus.CREATED.equals(response.getStatusCode())) {
 			this.ticketResponse = response.getBody();
-//			log.info(ticketResponse);
+			log.info("obtenerTicket() - Ticker obtenido:  " + this.ticketResponse.getTicket());
 		} else if (intentosLlamadaAPI < 3) {
 			intentosLlamadaAPI++;
 			log.info("obtenerTicket() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
@@ -312,9 +307,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 			throw new GeneralException("obtenerTicket() - Error al llamar a la API - Superado número de reintentos: "
 					+ response.getStatusCode().toString());
 		}
-		{
-			log.info(response);
-		}
+
 	}
 
 	/**
@@ -388,11 +381,9 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	 * @throws GeneralException
 	 */
 	private HttpHeaders cabeceraConTicket(MediaType contentType) throws GeneralException {
-
 		if (!validarTicket()) {
 			obtenerTicket();
 		}
-
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", this.ticketResponse.getTicket());
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -443,6 +434,31 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	private DocumentoResponse crearDocumento(String idBinario) throws GeneralException {
 		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_JSON);
 		HttpEntity<DatosAltaDocumentoRequest> requestEntity;
+		DatosAltaDocumentoRequest datosAlta = generarDatosAltaDocumento(idBinario);
+
+		requestEntity = new HttpEntity<>(datosAlta, headers);
+		ResponseEntity<DocumentoResponse> response = restTemplate.exchange(gedeApiDocumentosCrear, HttpMethod.POST,
+				requestEntity, new ParameterizedTypeReference<DocumentoResponse>() {
+				});
+		if (HttpStatus.CREATED.equals(response.getStatusCode())) {
+			return response.getBody();
+		} else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
+			intentosLlamadaAPI++;
+			log.info("crearDocumento() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
+			return crearDocumento(idBinario);
+		} else {
+			throw new GeneralException("crearDocumento() - Error al llamar a la API - Superado número de reintentos: "
+					+ response.getStatusCode().toString());
+		}
+	}
+
+	/**
+	 * Generar datos alta.
+	 *
+	 * @param idBinario the id binario
+	 * @return the datos alta documento request
+	 */
+	private DatosAltaDocumentoRequest generarDatosAltaDocumento(String idBinario) {
 		DatosAltaDocumentoRequest datosAlta = new DatosAltaDocumentoRequest();
 		datosAlta.setDeposito(""); // TODO Falta valor
 		datosAlta.setTipoDocumental("idoc:type_23");
@@ -480,21 +496,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 //		  "identificadorBinario": "string",
 //		  "formatoBinario": "PDF", //obligatorio
 //		}
-
-		requestEntity = new HttpEntity<>(datosAlta, headers);
-		ResponseEntity<DocumentoResponse> response = restTemplate.exchange(gedeApiDocumentosCrear, HttpMethod.POST,
-				requestEntity, new ParameterizedTypeReference<DocumentoResponse>() {
-				});
-		if (HttpStatus.CREATED.equals(response.getStatusCode())) {
-			return response.getBody();
-		} else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
-			intentosLlamadaAPI++;
-			log.info("crearDocumento() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
-			return crearDocumento(idBinario);
-		} else {
-			throw new GeneralException("crearDocumento() - Error al llamar a la API - Superado número de reintentos: "
-					+ response.getStatusCode().toString());
-		}
+		return datosAlta;
 	}
 
 	/**
@@ -605,8 +607,6 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 				directories.add(file);
 			}
 		}
-
 		return directories;
 	}
-
 }
