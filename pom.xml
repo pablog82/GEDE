@@ -156,6 +156,17 @@
 	</dependencies>
 
 	<build>
+		<!-- <resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>gede.properties</exclude>
+					<exclude>afirma.properties</exclude>
+				</excludes>
+				<filtering>false</filtering>
+			</resource>
+		</resources>-->
+
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -174,5 +185,23 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>jar</id>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<excludes>
+							<exclude>gede.properties</exclude>
+							<exclude>afirma.properties</exclude>
+						</excludes>
+						<filtering>false</filtering>
+					</resource>
+				</resources>
+			</build>
+		</profile>
+	</profiles>
 
 </project>

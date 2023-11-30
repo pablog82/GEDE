@@ -23,9 +23,10 @@ import com.babelgroup.gede.service.RegistroService;
 @SpringBootApplication
 @PropertySources({
     @PropertySource("classpath:application.properties"),
+    @PropertySource("classpath:log4j2.properties"),
     @PropertySource("classpath:database.properties"),
     @PropertySource("classpath:afirma.properties"),
-    @PropertySource("classpath:gede.properties")
+    @PropertySource("classpath:gede.properties")    
 })
 public class GedeApplication implements CommandLineRunner {
 
