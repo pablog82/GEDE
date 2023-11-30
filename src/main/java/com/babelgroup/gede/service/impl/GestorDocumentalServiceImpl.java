@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,8 @@ import lombok.extern.log4j.Log4j2;
  * The Class GestorDocumentalServiceImpl.
  */
 @Service
+
+/** The Constant log. */
 
 /** The Constant log. */
 
@@ -108,6 +112,9 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	@Value("${gede.api.documentos.cerrar}")
 	private String gedeApiDocumentosCerrar;
 
+	@Value("${fase}")
+	private Integer fase;
+
 	/** The firma service. */
 	@Autowired
 	private FirmaService firmaService;
@@ -149,66 +156,85 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 				// 2. Listar fichero por carpetas
 				for (File directorioExpediente : listadoDirectoriosExpedientes) {
 
-					log.info(MessageFormat.format(PASO_2_LISTAR_FICHEROS_EN_LA_CARPETA, directorioExpediente));
+					listarFicherosExpedientes(directorioExpediente);
+				}
+			} else {
+				log.info("--- No se han encontrado carpetas que procesar");
+			}
 
-					String expediente = directorioExpediente.getName();
+		} catch (IOException e) {
+			log.info("--- Error al listar los expedientes: " + e.getMessage());
+		} catch (GeneralException e) {
+			log.info(e);
+		}
 
-					try {
+		log.info("-- FIN DEL PROCESO DE DOCUMENTOS ---");
+	}
 
-						List<File> listadoFicherosExpediente = listFiles(directorioExpediente.getAbsolutePath());
-						if (listadoFicherosExpediente != null && !listadoFicherosExpediente.isEmpty()) {
+	/**
+	 * Listar ficheros expedientes.
+	 *
+	 * @param directorioExpediente the directorio expediente
+	 * @throws GeneralException the general exception
+	 */
+	private void listarFicherosExpedientes(File directorioExpediente) throws GeneralException {
+		log.info(MessageFormat.format(PASO_2_LISTAR_FICHEROS_EN_LA_CARPETA, directorioExpediente));
 
-							log.info(MessageFormat.format(DOCUMENTOS_DE_EXPEDIENTES_ENCONTRADOS,
-									listadoFicherosExpediente.toString()));
+		String expediente = directorioExpediente.getName();
 
-							// 4. Procesar fichero
-							for (File ficheroExpediente : listadoFicherosExpediente) {
+		try {
 
-								log.info(MessageFormat.format(PASO_4_PROCESANDO_FICHERO_FICHEROS_EN_LA_CARPETA,
-										directorioExpediente));
+			List<File> listadoFicherosExpediente = listFiles(directorioExpediente.getAbsolutePath());
+			if (listadoFicherosExpediente != null && !listadoFicherosExpediente.isEmpty()) {
 
-								String documento = ficheroExpediente.getName();
+				log.info(MessageFormat.format(DOCUMENTOS_DE_EXPEDIENTES_ENCONTRADOS,
+						listadoFicherosExpediente.toString()));
 
-								// TODO 4.1. Comprobar si está procesado
+				// 4. Procesar fichero
+				for (File ficheroExpediente : listadoFicherosExpediente) {
 
-								List<Registro> registros = registroService.findByExpedienteAndDocumento(expediente,
-										documento);
+					log.info(MessageFormat.format(PASO_4_PROCESANDO_FICHERO_FICHEROS_EN_LA_CARPETA,
+							directorioExpediente));
 
-								if (registros.isEmpty()) {
+					String documento = ficheroExpediente.getName();
 
-									// TODO 4.2. Almacenar binario
+					// TODO 4.1. Comprobar si está procesado
 
-									intentosLlamadaAPI = 0;
+					List<Registro> registros = registroService.findByExpedienteAndDocumento(expediente, documento);
 
-									RespuestaGenerica respuestaAlmacenarBinario;
-									try {
-										respuestaAlmacenarBinario = almacenarBinario(ficheroExpediente);
-									} catch (GeneralException e) {
-										Registro registro = new Registro(expediente, documento, null,
-												"Error al almacenar el binario: " + e.getMessage(), "ERROR");
-										registroService.insert(registro);
-										throw new GeneralException(e);
-									}
+					if (registros.isEmpty()) {
 
-									intentosLlamadaAPI = 0;
+						// TODO 4.2. Almacenar binario
 
-									// TODO 4.3. Crear documento
+						intentosLlamadaAPI = 0;
 
-									DocumentoResponse responseCrearDocumento;
-									try {
-										responseCrearDocumento = crearDocumento(
-												respuestaAlmacenarBinario.getIdentificador());
-									} catch (GeneralException e) {
-										Registro registro = new Registro(expediente, documento, null,
-												"Error al crear el documento: " + e.getMessage(), "ERROR");
-										registroService.insert(registro);
-										throw new GeneralException(e);
-									}
+						RespuestaGenerica respuestaAlmacenarBinario;
+						try {
+							respuestaAlmacenarBinario = almacenarBinario(ficheroExpediente);
+						} catch (GeneralException e) {
+							Registro registro = new Registro(expediente, documento, null,
+									"Error al almacenar el binario: " + e.getMessage(), "ERROR");
+							registroService.insert(registro);
+							throw new GeneralException(e);
+						}
 
-									// TODO 4.4. Firmar
+						intentosLlamadaAPI = 0;
 
-									String justificanteBase64 = EncodeDecode
-											.encode(Files.readAllBytes(ficheroExpediente.toPath()));
+						// TODO 4.3. Crear documento
+
+						DocumentoResponse responseCrearDocumento;
+						try {
+							responseCrearDocumento = crearDocumento(respuestaAlmacenarBinario.getIdentificador());
+						} catch (GeneralException e) {
+							Registro registro = new Registro(expediente, documento, null,
+									"Error al crear el documento: " + e.getMessage(), "ERROR");
+							registroService.insert(registro);
+							throw new GeneralException(e);
+						}
+
+						// TODO 4.4. Firmar
+
+						String justificanteBase64 = EncodeDecode.encode(Files.readAllBytes(ficheroExpediente.toPath()));
 
 //									String firmarJustificante = firmaService.firmarJustificante(justificanteBase64);
 
@@ -217,61 +243,47 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 //													UUID.randomUUID().toString() + "_FIRMADO.PDF")),
 //											EncodeDecode.decode(firmarJustificante));
 
-									// TODO 4.5 Almacenar firmantes
+						// TODO 4.5 Almacenar firmantes
 
-									intentosLlamadaAPI = 0;
+						intentosLlamadaAPI = 0;
 
-									try {
-										FirmaResponse firmaResponse = agregarFirmantes(documento, null);
-									} catch (GeneralException e) {
-										Registro registro = new Registro(expediente, documento, null,
-												"Error al almacenar los firmantes el documento: " + e.getMessage(), "ERROR");
-										registroService.insert(registro);
-										throw new GeneralException(e);
-									}
-
-									// TODO 4.6 Cerrar documento
-									intentosLlamadaAPI = 0;
-
-									try {
-										cerrarDocumento(responseCrearDocumento.getIdentificador());
-									} catch (GeneralException e) {
-										Registro registro = new Registro(expediente, documento, null,
-												"Error al cerrar el documento: " + e.getMessage(), "ERROR");
-										registroService.insert(registro);
-										throw new GeneralException(e);
-									}
-
-									// TODO 4.6 Registar en base de datos
-									Registro registro = new Registro(expediente, documento,
-											responseCrearDocumento.getIdentificador(), "Documento almacenado", "OK");
-									registroService.insert(registro);
-								} else {
-									log.info("Ya se ha procesado el documento");
-								}
-
-							}
-						} else {
-							log.info("--- No se han encontrado documentos que procesar");
+						try {
+							FirmaResponse firmaResponse = agregarFirmantes(documento, null);
+						} catch (GeneralException e) {
+							Registro registro = new Registro(expediente, documento, null,
+									"Error al almacenar los firmantes el documento: " + e.getMessage(), "ERROR");
+							registroService.insert(registro);
+							throw new GeneralException(e);
 						}
 
-					} catch (IOException e) {
-						throw new GeneralException(
-								"Error al listar los ficheros de la carperta " + directorioExpediente, e);
+						// TODO 4.6 Cerrar documento
+						intentosLlamadaAPI = 0;
+
+						try {
+							cerrarDocumento(responseCrearDocumento.getIdentificador());
+						} catch (GeneralException e) {
+							Registro registro = new Registro(expediente, documento, null,
+									"Error al cerrar el documento: " + e.getMessage(), "ERROR");
+							registroService.insert(registro);
+							throw new GeneralException(e);
+						}
+
+						// TODO 4.6 Registar en base de datos
+						Registro registro = new Registro(expediente, documento,
+								responseCrearDocumento.getIdentificador(), "Documento almacenado", "OK");
+						registroService.insert(registro);
+					} else {
+						log.info("Ya se ha procesado el documento");
 					}
+
 				}
 			} else {
-				log.info("--- No se han encontrado carpetas que procesar");
+				log.info("--- No se han encontrado documentos que procesar");
 			}
 
 		} catch (IOException e) {
-			log.info("--- Error al listar los expedientes: " + e.getMessage());
+			throw new GeneralException("Error al listar los ficheros de la carperta " + directorioExpediente, e);
 		}
-		catch (GeneralException e) {
-			log.info(e);
-		}
-
-		log.info("-- FIN DEL PROCESO DE DOCUMENTOS ---");
 	}
 
 	/**
@@ -432,6 +444,43 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_JSON);
 		HttpEntity<DatosAltaDocumentoRequest> requestEntity;
 		DatosAltaDocumentoRequest datosAlta = new DatosAltaDocumentoRequest();
+		datosAlta.setDeposito(""); // TODO Falta valor
+		datosAlta.setTipoDocumental("idoc:type_23");
+
+		List<String> listadoNombresMetadatos = Arrays
+				.asList(new String[] { "doc:field_23_1", "idoc:field_23_3", "idoc:field_23_4", "idoc:field_23_6",
+						"accesibilidadDocumento", "fechaAltaDocumento", "formatoDocumento", "nombreNaturalDocumento" });
+
+		List<ValoresMetadato> valoresMetadato = listadoNombresMetadatos.stream()
+				.map(nombre -> new ValoresMetadato(nombre)).collect(Collectors.toList());
+
+		datosAlta.setMetadatos(valoresMetadato);
+		datosAlta.setBorrador(false);
+		datosAlta.setIdentificadorBinario(idBinario);
+		datosAlta.setFormatoBinario("PDF");
+
+//		{
+//		  "deposito": "???",
+//		  "tipoDocumental": "idoc:type_23", 
+//		  "metadatos": [ //obligatorios
+//		    {
+//		      "nombre": [
+//		        "doc:field_23_1",
+//				"idoc:field_23_3",
+//				"idoc:field_23_4",
+//				"idoc:field_23_6",
+//				"accesibilidadDocumento",
+//				"fechaAltaDocumento",
+//				"formatoDocumento",
+//				"nombreNaturalDocumento"
+//		      ]
+//		    }
+//		  ],
+//		  "borrador": false,
+//		  "identificadorBinario": "string",
+//		  "formatoBinario": "PDF", //obligatorio
+//		}
+
 		requestEntity = new HttpEntity<>(datosAlta, headers);
 		ResponseEntity<DocumentoResponse> response = restTemplate.exchange(gedeApiDocumentosCrear, HttpMethod.POST,
 				requestEntity, new ParameterizedTypeReference<DocumentoResponse>() {
@@ -516,11 +565,25 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	private List<File> listDirectories(String directory) throws IOException {
 
 		List<File> directories = new ArrayList<File>();
-		File[] files = new File(directory).listFiles();
-		for (File file : files) {
-			if (file.isDirectory()) {
-				directories.add(file);
+		switch (this.fase) {
+		case 0: // Sólo un directorio raiz con todos los documentos colocados ahí
+			File diretoryFile = new File(directory);
+			if (diretoryFile.isDirectory()) {
+				directories.add(diretoryFile);
 			}
+			break;
+		case 1: // Directorio raíz con múltiples directorios (uno por expediente) y documentos
+				// en cada directorio
+
+			File[] files = new File(directory).listFiles();
+			for (File file : files) {
+				if (file.isDirectory()) {
+					directories.add(file);
+				}
+			}
+			break;
+		default:
+			break;
 		}
 
 		return directories;
