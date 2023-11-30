@@ -476,9 +476,9 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		datosAlta.setFormatoBinario("PDF");
 
 //		{
-//		  "deposito": "???",
-//		  "tipoDocumental": "idoc:type_23", 
-//		  "metadatos": [ //obligatorios
+//		  "deposito": "DEPO_OFICINA",
+//		  "tipoDocumental": "DOCUMENTO", 
+//		  "metadatos": [ 
 //		    {
 //		      "nombre": [
 //		        "doc:field_23_1",
@@ -492,9 +492,8 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 //		      ]
 //		    }
 //		  ],
-//		  "borrador": false,
-//		  "identificadorBinario": "string",
-//		  "formatoBinario": "PDF", //obligatorio
+//		  "borrador": true,
+//		  "formatoBinario": "PDF"
 //		}
 		return datosAlta;
 	}
