@@ -141,6 +141,9 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 	@Value("${gede.alta.documento.firma}")
 	private Boolean firmar;
+	
+	@Value("${gede.alta.documento.binario.tamanio.maximo}")
+	private Integer tamanioMaximoBinario;
 
 	/** The firma service. */
 	@Autowired
@@ -457,7 +460,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	}
 
 	private List<byte[]> dividirFicheroPartes(byte[] mainFile) {
-		int sizeMB = 90 * 1024 * 1024;
+		int sizeMB = tamanioMaximoBinario * 1024 * 1024;
 		List<byte[]> chunks = new ArrayList<>();
 		for (int i = 0; i < mainFile.length;) {
 			byte[] chunk = new byte[Math.min(sizeMB, mainFile.length - i)];
