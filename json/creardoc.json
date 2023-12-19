@@ -1,0 +1,22 @@
+{
+  "deposito": "DEPO_OFICINA",
+  "identificadorExpediente": "",
+  "identificadorCarpeta": "",
+  "rutaCarpeta": "",
+  "tipoDocumental": "DOCUMENTO",
+  "metadatos": [
+    {
+      "valores": [],
+      "titulo": "Fecha de digitalización orgánica",
+      "tipoDato": "FECHA",
+      "nombre": "fechaDigitalizacionDocumento",
+      "estructuras": [],
+      "ficheros": []
+    }
+  ],
+  "borrador": true,
+  "trabajo": true,
+  "identificadorBinario": "2BD60EEF887E4907B5AE40673AABB56C",
+  "formatoBinario": "PDF",
+  "formatoFirma": ""
+}
