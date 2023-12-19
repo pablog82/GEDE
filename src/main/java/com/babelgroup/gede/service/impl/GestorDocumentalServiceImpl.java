@@ -4,12 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +27,10 @@ import com.babelgroup.gede.dto.DatosAltaDocumentoRequest;
 import com.babelgroup.gede.dto.DatosAltaFirmantesRequest;
 import com.babelgroup.gede.dto.DocumentoResponse;
 import com.babelgroup.gede.dto.FirmaResponse;
+import com.babelgroup.gede.dto.Metadato;
 import com.babelgroup.gede.dto.RespuestaGenerica;
 import com.babelgroup.gede.dto.TicketRequest;
 import com.babelgroup.gede.dto.TicketResponse;
-import com.babelgroup.gede.dto.ValoresMetadato;
 import com.babelgroup.gede.exception.GeneralException;
 import com.babelgroup.gede.model.Registro;
 import com.babelgroup.gede.service.FirmaService;
@@ -109,6 +108,39 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	/** The fase. */
 	@Value("${fase}")
 	private Integer fase;
+
+	@Value("${gede.alta.documento.deposito}")
+	private String deposito;
+
+	@Value("${gede.alta.documento.tipoDocumental}")
+	private String tipoDocumental;
+
+	@Value("${gede.alta.documento.formato}")
+	private String formato;
+
+	@Value("${gede.alta.documento.accesibilidadDocumento}")
+	private String accesibilidadDocumento;
+
+	@Value("${gede.alta.documento.estadoElaboracion}")
+	private String estadoElaboracion;
+
+	@Value("${gede.alta.documento.origen}")
+	private String origen;
+
+	@Value("${gede.alta.documento.organo}")
+	private String organo;
+
+	@Value("${gede.alta.documento.unidadProductora}")
+	private String unidadProductora;
+
+	@Value("${gede.alta.documento.tipoDocumento}")
+	private String tipoDocumento;
+
+	@Value("{gede.alta.documento.serie}")
+	private String serieDocumenal;
+
+	@Value("${gede.alta.documento.firma}")
+	private Boolean firmar;
 
 	/** The firma service. */
 	@Autowired
@@ -191,15 +223,16 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 					log.info(MessageFormat.format(PASO_4_PROCESANDO_FICHERO_FICHEROS_EN_LA_CARPETA,
 							directorioExpediente));
 
-					String documento = ficheroExpediente.getName();
+					String nombreDocumento = ficheroExpediente.getName();
 
-					// TODO 4.1. Comprobar si está procesado
+					// 4.1. Comprobar si está procesado
 
-					List<Registro> registros = registroService.findByExpedienteAndDocumento(expediente, documento);
+					List<Registro> registros = registroService.findByExpedienteAndDocumento(expediente,
+							nombreDocumento);
 
 					if (registros.isEmpty()) {
 
-						// TODO 4.2. Almacenar binario
+						// 4.2. Almacenar binario
 
 						intentosLlamadaAPI = 0;
 
@@ -207,7 +240,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 						try {
 							respuestaAlmacenarBinario = almacenarBinario(ficheroExpediente);
 						} catch (GeneralException e) {
-							Registro registro = new Registro(expediente, documento, null,
+							Registro registro = new Registro(expediente, nombreDocumento, null,
 									"Error al almacenar el binario: " + e.getMessage(), "ERROR");
 							registroService.insert(registro);
 							throw new GeneralException(e);
@@ -215,21 +248,24 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 						intentosLlamadaAPI = 0;
 
-						// TODO 4.3. Crear documento
+						// 4.3. Crear documento
 
 						DocumentoResponse responseCrearDocumento;
 						try {
-							responseCrearDocumento = crearDocumento(respuestaAlmacenarBinario.getIdentificador());
+							responseCrearDocumento = crearDocumento(nombreDocumento,
+									respuestaAlmacenarBinario.getIdentificador());
 						} catch (GeneralException e) {
-							Registro registro = new Registro(expediente, documento, null,
+							Registro registro = new Registro(expediente, nombreDocumento, null,
 									"Error al crear el documento: " + e.getMessage(), "ERROR");
 							registroService.insert(registro);
 							throw new GeneralException(e);
 						}
 
-						// TODO 4.4. Firmar
+						if (firmar) {
+							// 4.4. Firmar
 
-						String justificanteBase64 = EncodeDecode.encode(Files.readAllBytes(ficheroExpediente.toPath()));
+							String justificanteBase64 = EncodeDecode
+									.encode(Files.readAllBytes(ficheroExpediente.toPath()));
 
 //									String firmarJustificante = firmaService.firmarJustificante(justificanteBase64);
 
@@ -238,34 +274,36 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 //													UUID.randomUUID().toString() + "_FIRMADO.PDF")),
 //											EncodeDecode.decode(firmarJustificante));
 
-						// TODO 4.5 Almacenar firmantes
+							// 4.5 Almacenar firmantes
 
-						intentosLlamadaAPI = 0;
+							intentosLlamadaAPI = 0;
 
-						try {
-							FirmaResponse firmaResponse = agregarFirmantes(documento, null);
-						} catch (GeneralException e) {
-							Registro registro = new Registro(expediente, documento, null,
-									"Error al almacenar los firmantes el documento: " + e.getMessage(), "ERROR");
-							registroService.insert(registro);
-							throw new GeneralException(e);
+							try {
+								FirmaResponse firmaResponse = agregarFirmantes(nombreDocumento, null);
+							} catch (GeneralException e) {
+								Registro registro = new Registro(expediente, nombreDocumento, null,
+										"Error al almacenar los firmantes el documento: " + e.getMessage(), "ERROR");
+								registroService.insert(registro);
+								throw new GeneralException(e);
+							}
+
+							// 4.6 Cerrar documento
+							intentosLlamadaAPI = 0;
+
+							try {
+								cerrarDocumento(responseCrearDocumento.getIdentificador());
+							} catch (GeneralException e) {
+								Registro registro = new Registro(expediente, nombreDocumento, null,
+										"Error al cerrar el documento: " + e.getMessage(), "ERROR");
+								registroService.insert(registro);
+								throw new GeneralException(e);
+							}
 						}
 
-						// TODO 4.6 Cerrar documento
-						intentosLlamadaAPI = 0;
-
-						try {
-							cerrarDocumento(responseCrearDocumento.getIdentificador());
-						} catch (GeneralException e) {
-							Registro registro = new Registro(expediente, documento, null,
-									"Error al cerrar el documento: " + e.getMessage(), "ERROR");
-							registroService.insert(registro);
-							throw new GeneralException(e);
-						}
-
-						// TODO 4.6 Registar en base de datos
-						Registro registro = new Registro(expediente, documento,
-								responseCrearDocumento.getIdentificador(), "Documento almacenado", "OK");
+						// 4.6 Registar en base de datos
+						Registro registro = new Registro(expediente, nombreDocumento,
+								responseCrearDocumento.getIdentificador(), "Documento almacenado",
+								"OK - [firmado: " + firmar + "]");
 						registroService.insert(registro);
 					} else {
 						log.info("Ya se ha procesado el documento");
@@ -347,33 +385,6 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	}
 
 	/**
-	 * Gets the tipos documentales.
-	 *
-	 * @param contentType the content type
-	 * @return the tipos documentales
-	 * @throws GeneralException the general exception
-	 */
-	// TODO llamada de prueba para usar el ticket (BORRAR)
-//	private void getTiposDocumentales() throws GeneralException {
-//
-//		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_JSON);
-//
-//		HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-//
-//		ResponseEntity<String> response = restTemplate.exchange(
-//				"https://pre-plataforma.sevilla.org/gede-rest/api/v1/tipoDocumentales?operacion=ESCRITURA&formato=PAPEL&tipoEntidad=EXPEDIENTE",
-//				HttpMethod.GET, requestEntity, new ParameterizedTypeReference<String>() {
-//				});
-//
-//		if (HttpStatus.OK.equals(response.getStatusCode())) {
-//
-//			log.info(response);
-//		} else {
-//			log.info(response);
-//		}
-//	}
-
-	/**
 	 * Cabecera con ticket.
 	 *
 	 * @param contentType the content type
@@ -387,7 +398,6 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", this.ticketResponse.getTicket());
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-//		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setContentType(contentType);
 		return headers;
 	}
@@ -431,10 +441,10 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	 * @return the documento response
 	 * @throws GeneralException the general exception
 	 */
-	private DocumentoResponse crearDocumento(String idBinario) throws GeneralException {
+	private DocumentoResponse crearDocumento(String nombreDocumento, String idBinario) throws GeneralException {
 		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_JSON);
 		HttpEntity<DatosAltaDocumentoRequest> requestEntity;
-		DatosAltaDocumentoRequest datosAlta = generarDatosAltaDocumento(idBinario);
+		DatosAltaDocumentoRequest datosAlta = generarDatosAltaDocumento(nombreDocumento, idBinario);
 
 		requestEntity = new HttpEntity<>(datosAlta, headers);
 		ResponseEntity<DocumentoResponse> response = restTemplate.exchange(gedeApiDocumentosCrear, HttpMethod.POST,
@@ -445,7 +455,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		} else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
 			intentosLlamadaAPI++;
 			log.info("crearDocumento() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
-			return crearDocumento(idBinario);
+			return crearDocumento(nombreDocumento, idBinario);
 		} else {
 			throw new GeneralException("crearDocumento() - Error al llamar a la API - Superado número de reintentos: "
 					+ response.getStatusCode().toString());
@@ -458,148 +468,35 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	 * @param idBinario the id binario
 	 * @return the datos alta documento request
 	 */
-	private DatosAltaDocumentoRequest generarDatosAltaDocumento(String idBinario) {
+	private DatosAltaDocumentoRequest generarDatosAltaDocumento(String nombreDocumento, String idBinario) {
 		DatosAltaDocumentoRequest datosAlta = new DatosAltaDocumentoRequest();
-		datosAlta.setDeposito(""); // TODO Falta valor
-		datosAlta.setTipoDocumental("idoc:type_23");
-
-		List<String> listadoNombresMetadatos = Arrays
-				.asList(new String[] { "doc:field_23_1", "idoc:field_23_3", "idoc:field_23_4", "idoc:field_23_6",
-						"accesibilidadDocumento", "fechaAltaDocumento", "formatoDocumento", "nombreNaturalDocumento" });
-
-		List<ValoresMetadato> valoresMetadato = listadoNombresMetadatos.stream()
-				.map(nombre -> new ValoresMetadato(nombre)).collect(Collectors.toList());
-
-		datosAlta.setMetadatos(valoresMetadato);
-		datosAlta.setBorrador(false);
+		datosAlta.setDeposito(deposito);
+		datosAlta.setIdentificadorExpediente(null);
 		datosAlta.setIdentificadorBinario(idBinario);
 		datosAlta.setFormatoBinario("PDF");
+		datosAlta.setTipoDocumental(tipoDocumental);
+		datosAlta.setBorrador(false);
+		datosAlta.setTrabajo(true);
 
-//		{
-//		    "deposito": "DEPO_SIGLAS",
-//		    "identificadorExpediente": null,
-//		    "identificadorCarpeta": null,
-//		    "rutaCarpeta": null,
-//		    "identificadorBinario": "F365617839E74C57A1E12CD53112AC63",
-//		    "formatoBinario": "PDF",
-//		    "metadatos": [
-//		        {
-//		            "nombre": "idoc:field_23_1",
-//		            "valores": ["TD99"]
-//		        },
-//		        {
-//		            "nombre": "idiomaDocumento",
-//		            "valores": [
-//		                "es"
-//		            ]
-//		        },
-//		        {
-//		            "nombre": "fechaAltaDocumento",
-//		            "valores": [
-//		                "2023-12-01T13:18:16+01:00"
-//		            ]
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_11",
-//		            "valores": []
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_12",
-//		            "valores": []
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_13",
-//		            "valores": [
-//		                "SIGGLAS"
-//		            ]
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_14",
-//		            "valores": [
-//		                "PDF"
-//		            ]
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_15",
-//		            "valores": []
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_16",
-//		            "valores": []
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_17",
-//		            "valores": []
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_18",
-//		            "valores": []
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_3",
-//		            "valores": [
-//		                "L01410917"
-//		            ]
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_2",
-//		            "valores": [
-//		                "ES_L01410917_2020_00D1702633622779266677165477"
-//		            ]
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_4",
-//		            "valores": [
-//		                "0"
-//		            ]
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_5",
-//		            "valores": []
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_6",
-//		            "valores": [
-//		                "EE99"
-//		            ]
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_9",
-//		            "valores": []
-//		        },
-//		        {
-//		            "nombre": "accesibilidadDocumento",
-//		            "valores": [
-//		                "R"
-//		            ]
-//		        },
-//		        {
-//		            "nombre": "formatoDocumento",
-//		            "valores": [
-//		                "Electronico"
-//		            ]
-//		        },
-//		        {
-//		            "nombre": "nombreNaturalDocumento",
-//		            "valores": [
-//		                "El nombre del documento"
-//		            ]
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_8",
-//		            "valores": [
-//		                "http://administracionelectronica.gob.es/ENI/XSD/v1.0/documento-e"
-//		            ]
-//		        },
-//		        {
-//		            "nombre": "idoc:field_23_10",
-//		            "valores": []
-//		        }
-//		    ],
-//		    "tipoDocumental": "idoc:type_23",
-//		    "borrador": false,
-//		    "trabajo": true
-//		}
+		// Metadatos
+		List<Metadato> metadatos = new ArrayList<Metadato>();
+		metadatos.add(new Metadato("serieDocumento", new String[] { serieDocumenal }));
+		metadatos.add(new Metadato("nombreFichero", new String[] { nombreDocumento }));
+		metadatos.add(new Metadato("idoc:field_23_1", new String[] { tipoDocumento }));
+		metadatos.add(new Metadato("idiomaDocumento", new String[] { "es" }));
+		metadatos.add(new Metadato("fechaAltaDocumento", new String[] { Instant.now().toString() })); 
+		metadatos.add(new Metadato("idoc:field_23_13", new String[] { unidadProductora }));
+		metadatos.add(new Metadato("idoc:field_23_14", new String[] { "PDF" }));
+		metadatos.add(new Metadato("idoc:field_23_3", new String[] { organo }));
+		metadatos.add(new Metadato("idoc:field_23_4", new String[] { origen }));
+		metadatos.add(new Metadato("idoc:field_23_6", new String[] { estadoElaboracion }));
+		metadatos.add(new Metadato("accesibilidadDocumento", new String[] { accesibilidadDocumento }));
+		metadatos.add(new Metadato("formatoDocumento", new String[] { formato }));
+		metadatos.add(new Metadato("nombreNaturalDocumento", new String[] { nombreDocumento }));
+		metadatos.add(new Metadato("idoc:field_23_8",
+				new String[] { "http://administracionelectronica.gob.es/ENI/XSD/v1.0/documento-e" }));
+
+		datosAlta.setMetadatos(metadatos);
 		return datosAlta;
 	}
 
@@ -639,8 +536,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	 * @return the firma response
 	 * @throws GeneralException the general exception
 	 */
-	private FirmaResponse agregarFirmantes(String idDocumento, List<ValoresMetadato> metadatos)
-			throws GeneralException {
+	private FirmaResponse agregarFirmantes(String idDocumento, List<Metadato> metadatos) throws GeneralException {
 
 		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_JSON);
 		HttpEntity<DatosAltaFirmantesRequest> requestEntity;

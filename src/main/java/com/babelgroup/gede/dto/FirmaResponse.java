@@ -20,5 +20,5 @@ public class FirmaResponse {
 	private String identificador;
 	private List<ErrorValidacion> erroresValidacion;
 	private DatosFirmante datosFirmante;
-	private List<ValoresMetadato> metadatos;
+	private List<Metadato> metadatos;
 }

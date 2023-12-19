@@ -16,6 +16,6 @@ import lombok.ToString;
 public class DatosAltaFirmantesRequest {
 
 	private String tipoDocumental;
-	private List<ValoresMetadato> metadatos;
+	private List<Metadato> metadatos;
 
 }

@@ -9,6 +9,7 @@ import lombok.ToString;
 @Setter
 @AllArgsConstructor
 @ToString
-public class ValoresMetadato {
+public class Metadato {
 	private String nombre;
+	private String[] valores;
 }

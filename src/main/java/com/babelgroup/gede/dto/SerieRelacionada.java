@@ -13,5 +13,5 @@ import lombok.ToString;
 @ToString
 public class SerieRelacionada {
 	private SerieConfiguracion datosSerie;
-	private List<ValoresMetadato> metadatos;
+	private List<Metadato> metadatos;
 }
