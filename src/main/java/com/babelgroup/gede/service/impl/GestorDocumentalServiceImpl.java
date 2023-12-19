@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.babelgroup.gede.dto.DatosAltaDocumentoRequest;
@@ -412,7 +413,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	private RespuestaGenerica almacenarBinario(File fichero) throws GeneralException {
 		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_OCTET_STREAM);
 
-		// ?parteActual=1&partesTotal=2
+		// ?parteActual=1&partesTotal=2&idBinario=as
 
 		HttpEntity<byte[]> requestEntity;
 		RespuestaGenerica r = null;
@@ -430,6 +431,10 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 				requestEntity = new HttpEntity<>(partes.get(i), headers);
 
 				String urlParte = MessageFormat.format(gedeApiBinarios, i + 1, partes.size());
+
+				if (i > 0) {
+					urlParte.concat("&idBinario=" + r.getIdentificador());
+				}
 
 				ResponseEntity<RespuestaGenerica> response = restTemplate.exchange(urlParte, HttpMethod.POST,
 						requestEntity, new ParameterizedTypeReference<RespuestaGenerica>() {
@@ -449,12 +454,14 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 		} catch (IOException e) {
 			throw new GeneralException("almacenarBinario() - Error al leer el fichero a almacenar", e);
+		} catch (RestClientException e) {
+			throw new GeneralException("almacenarBinario() - Error al almacenar el binario", e);
 		}
 		return r;
 	}
 
 	private List<byte[]> dividirFicheroPartes(byte[] mainFile) {
-		int sizeMB = 100 * 1024 * 1024;
+		int sizeMB = 90 * 1024 * 1024;
 		List<byte[]> chunks = new ArrayList<>();
 		for (int i = 0; i < mainFile.length;) {
 			byte[] chunk = new byte[Math.min(sizeMB, mainFile.length - i)];
