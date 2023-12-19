@@ -1,0 +1,521 @@
+{
+	"info": {
+		"_postman_id": "c38b4507-c368-4446-ab41-72dc47147c25",
+		"name": "[G·EDE] Api Rest",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15317225"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"item": [
+				{
+					"name": "Obtener ticket G-EDE",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var data = JSON.parse(responseBody);\r",
+									"if(data.codigoRespuesta==201){\r",
+									"    pm.environment.set(\"ticket\", data.ticket);\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"followAuthorizationHeader": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\"usuario\": \"SIGGLAS\",\r\n\"password\": \"SIGGLAS\",\r\n\"organismo\": \"SAETAS\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://pre-plataforma.sevilla.org/gede-rest/api/v1/ticket",
+							"protocol": "https",
+							"host": [
+								"pre-plataforma",
+								"sevilla",
+								"org"
+							],
+							"path": [
+								"gede-rest",
+								"api",
+								"v1",
+								"ticket"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Expediente",
+			"item": [
+				{
+					"name": "Alta",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var data = JSON.parse(responseBody);",
+									"pm.environment.set(\"idExpediente\", data.identificador);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const dateNow = new Date();",
+									"pm.environment.set('currentDate', dateNow.toISOString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "1702917899049UwUX3Q6TeiEtWNfSl"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"deposito\": \"DEPO_SIGLAS\",\n\"tipoDocumental\": \"idoc:type_22\",\n\"metadatos\": [\n{\n\"nombre\": \"idoc:field_22_2\",\n\"valores\": [\"L01410917\"]\n},\n{\n\"nombre\": \"idoc:field_22_13\",\n\"valores\": [\n\"EXP PARA NOMINAS\"\n]\n},\n        {\n            \"nombre\": \"idoc:field_22_3\",\n            \"valores\": [\n                \"SIGGLAS\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_22_4\",\n            \"valores\": [\n                \"clasificacion\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_22_5\",\n            \"valores\": [\n                \"R\"\n            ]\n        }\n    ],\n\"borrador\": false,\n\"trabajo\": false\n}"
+						},
+						"url": {
+							"raw": "https://pre-plataforma.sevilla.org/gede-rest/api/v1/expedientes",
+							"protocol": "https",
+							"host": [
+								"pre-plataforma",
+								"sevilla",
+								"org"
+							],
+							"path": [
+								"gede-rest",
+								"api",
+								"v1",
+								"expedientes"
+							],
+							"query": [
+								{
+									"key": "idTransaccion",
+									"value": "{{transaccion}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Alta Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var data = JSON.parse(responseBody);",
+									"pm.environment.set(\"idExpediente\", data.identificador);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const dateNow = new Date();",
+									"pm.environment.set('currentDate', dateNow.toISOString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "1702917899049UwUX3Q6TeiEtWNfSl"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"deposito\": \"DEPO_SIGLAS\",\n\"tipoDocumental\": \"idoc:type_22\",\n\"metadatos\": [\n{\n\"nombre\": \"idoc:field_22_2\",\n\"valores\": [\"L01410917\"]\n},\n{\n\"nombre\": \"idoc:field_22_13\",\n\"valores\": [\n\"EXP PARA NOMINAS\"\n]\n},\n        {\n            \"nombre\": \"idoc:field_22_3\",\n            \"valores\": [\n                \"SIGGLAS\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_22_4\",\n            \"valores\": [\n                \"clasificacion\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_22_5\",\n            \"valores\": [\n                \"R\"\n            ]\n        }\n    ],\n\"borrador\": false,\n\"trabajo\": false\n}"
+						},
+						"url": {
+							"raw": "https://pre-plataforma.sevilla.org/gede-rest/api/v1/expedientes/",
+							"protocol": "https",
+							"host": [
+								"pre-plataforma",
+								"sevilla",
+								"org"
+							],
+							"path": [
+								"gede-rest",
+								"api",
+								"v1",
+								"expedientes",
+								""
+							],
+							"query": [
+								{
+									"key": "idTransaccion",
+									"value": "{{transaccion}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Documento",
+			"item": [
+				{
+					"name": "Registrar binario",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var data = JSON.parse(responseBody);",
+									"if(data.codigoRespuesta==201){",
+									"    pm.environment.set(\"idBinario\", data.identificador);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "1702926779226DLkVz2SM0HzsD9JW5",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/octet-stream",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": "/C:/Users/noeminebot/Downloads/doc_incorporado.pdf"
+							}
+						},
+						"url": {
+							"raw": "https://pre-plataforma.sevilla.org/gede-rest/api/v1/binarios/",
+							"protocol": "https",
+							"host": [
+								"pre-plataforma",
+								"sevilla",
+								"org"
+							],
+							"path": [
+								"gede-rest",
+								"api",
+								"v1",
+								"binarios",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Alta sin expediente [Ayto Sevilla]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var data = JSON.parse(responseBody);",
+									"if(data.codigoRespuesta==201){",
+									"    pm.environment.set(\"idDocumento\", data.identificador);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const dateNow = new Date();",
+									"pm.environment.set('currentDate', dateNow.toISOString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "1702917899049UwUX3Q6TeiEtWNfSl"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"deposito\": \"DEPO_SIGLAS\",\n    \"identificadorExpediente\": null,\n    \"identificadorCarpeta\": null,\n    \"rutaCarpeta\": null,\n    \"identificadorBinario\": \"F365617839E74C57A1E12CD53112AC63\",\n    \"formatoBinario\": \"PDF\",\n    \"metadatos\": [\n        {\n            \"nombre\": \"idoc:field_23_1\",\n            \"valores\": [\"TD99\"]\n        },\n        {\n            \"nombre\": \"idiomaDocumento\",\n            \"valores\": [\n                \"es\"\n            ]\n        },\n        {\n            \"nombre\": \"fechaAltaDocumento\",\n            \"valores\": [\n                \"2023-12-01T13:18:16+01:00\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_11\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_12\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_13\",\n            \"valores\": [\n                \"SIGGLAS\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_14\",\n            \"valores\": [\n                \"PDF\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_15\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_16\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_17\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_18\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_3\",\n            \"valores\": [\n                \"L01410917\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_2\",\n            \"valores\": [\n                \"ES_L01410917_2020_00D1702633622779266677165477\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_4\",\n            \"valores\": [\n                \"0\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_5\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_6\",\n            \"valores\": [\n                \"EE99\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_9\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"accesibilidadDocumento\",\n            \"valores\": [\n                \"R\"\n            ]\n        },\n        {\n            \"nombre\": \"formatoDocumento\",\n            \"valores\": [\n                \"Electronico\"\n            ]\n        },\n        {\n            \"nombre\": \"nombreNaturalDocumento\",\n            \"valores\": [\n                \"El nombre del documento\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_8\",\n            \"valores\": [\n                \"http://administracionelectronica.gob.es/ENI/XSD/v1.0/documento-e\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_10\",\n            \"valores\": []\n        }\n    ],\n    \"tipoDocumental\": \"idoc:type_23\",\n    \"borrador\": false,\n    \"trabajo\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://pre-plataforma.sevilla.org/gede-rest/api/v1/documentos",
+							"protocol": "https",
+							"host": [
+								"pre-plataforma",
+								"sevilla",
+								"org"
+							],
+							"path": [
+								"gede-rest",
+								"api",
+								"v1",
+								"documentos"
+							],
+							"query": [
+								{
+									"key": "idTransaccion",
+									"value": "{{transaccion}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ConsultaTipoDocumental",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var data = JSON.parse(responseBody);",
+									"if(data.codigoRespuesta==201){",
+									"    pm.environment.set(\"idDocumento\", data.identificador);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const dateNow = new Date();",
+									"pm.environment.set('currentDate', dateNow.toISOString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "1702917899049UwUX3Q6TeiEtWNfSl"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"deposito\": \"DEPO_SIGLAS\",\n    \"identificadorExpediente\": null,\n    \"identificadorCarpeta\": null,\n    \"rutaCarpeta\": null,\n    \"identificadorBinario\": \"F365617839E74C57A1E12CD53112AC63\",\n    \"formatoBinario\": \"PDF\",\n    \"metadatos\": [\n        {\n            \"nombre\": \"idoc:field_23_1\",\n            \"valores\": [\"TD99\"]\n        },\n        {\n            \"nombre\": \"idiomaDocumento\",\n            \"valores\": [\n                \"es\"\n            ]\n        },\n        {\n            \"nombre\": \"fechaAltaDocumento\",\n            \"valores\": [\n                \"2023-12-01T13:18:16+01:00\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_11\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_12\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_13\",\n            \"valores\": [\n                \"SIGGLAS\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_14\",\n            \"valores\": [\n                \"PDF\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_15\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_16\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_17\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_18\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_3\",\n            \"valores\": [\n                \"L01410917\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_2\",\n            \"valores\": [\n                \"ES_L01410917_2020_00D1702633622779266677165477\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_4\",\n            \"valores\": [\n                \"0\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_5\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_6\",\n            \"valores\": [\n                \"EE99\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_9\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"accesibilidadDocumento\",\n            \"valores\": [\n                \"R\"\n            ]\n        },\n        {\n            \"nombre\": \"formatoDocumento\",\n            \"valores\": [\n                \"Electronico\"\n            ]\n        },\n        {\n            \"nombre\": \"nombreNaturalDocumento\",\n            \"valores\": [\n                \"El nombre del documento\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_8\",\n            \"valores\": [\n                \"http://administracionelectronica.gob.es/ENI/XSD/v1.0/documento-e\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_10\",\n            \"valores\": []\n        }\n    ],\n    \"tipoDocumental\": \"idoc:type_23\",\n    \"borrador\": false,\n    \"trabajo\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://pre-plataforma.sevilla.org/gede-rest/api/v1/documentos",
+							"protocol": "https",
+							"host": [
+								"pre-plataforma",
+								"sevilla",
+								"org"
+							],
+							"path": [
+								"gede-rest",
+								"api",
+								"v1",
+								"documentos"
+							],
+							"query": [
+								{
+									"key": "idTransaccion",
+									"value": "{{transaccion}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ConsultaTipoDocumental Expedte",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var data = JSON.parse(responseBody);",
+									"if(data.codigoRespuesta==201){",
+									"    pm.environment.set(\"idDocumento\", data.identificador);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const dateNow = new Date();",
+									"pm.environment.set('currentDate', dateNow.toISOString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "1702917899049UwUX3Q6TeiEtWNfSl"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"deposito\": \"DEPO_SIGLAS\",\n    \"identificadorExpediente\": null,\n    \"identificadorCarpeta\": null,\n    \"rutaCarpeta\": null,\n    \"identificadorBinario\": \"F365617839E74C57A1E12CD53112AC63\",\n    \"formatoBinario\": \"PDF\",\n    \"metadatos\": [\n        {\n            \"nombre\": \"idoc:field_23_1\",\n            \"valores\": [\"TD99\"]\n        },\n        {\n            \"nombre\": \"idiomaDocumento\",\n            \"valores\": [\n                \"es\"\n            ]\n        },\n        {\n            \"nombre\": \"fechaAltaDocumento\",\n            \"valores\": [\n                \"2023-12-01T13:18:16+01:00\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_11\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_12\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_13\",\n            \"valores\": [\n                \"SIGGLAS\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_14\",\n            \"valores\": [\n                \"PDF\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_15\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_16\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_17\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_18\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_3\",\n            \"valores\": [\n                \"L01410917\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_2\",\n            \"valores\": [\n                \"ES_L01410917_2020_00D1702633622779266677165477\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_4\",\n            \"valores\": [\n                \"0\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_5\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"idoc:field_23_6\",\n            \"valores\": [\n                \"EE99\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_9\",\n            \"valores\": []\n        },\n        {\n            \"nombre\": \"accesibilidadDocumento\",\n            \"valores\": [\n                \"R\"\n            ]\n        },\n        {\n            \"nombre\": \"formatoDocumento\",\n            \"valores\": [\n                \"Electronico\"\n            ]\n        },\n        {\n            \"nombre\": \"nombreNaturalDocumento\",\n            \"valores\": [\n                \"El nombre del documento\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_8\",\n            \"valores\": [\n                \"http://administracionelectronica.gob.es/ENI/XSD/v1.0/documento-e\"\n            ]\n        },\n        {\n            \"nombre\": \"idoc:field_23_10\",\n            \"valores\": []\n        }\n    ],\n    \"tipoDocumental\": \"idoc:type_23\",\n    \"borrador\": false,\n    \"trabajo\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://pre-plataforma.sevilla.org/gede-rest/api/v1/documentos",
+							"protocol": "https",
+							"host": [
+								"pre-plataforma",
+								"sevilla",
+								"org"
+							],
+							"path": [
+								"gede-rest",
+								"api",
+								"v1",
+								"documentos"
+							],
+							"query": [
+								{
+									"key": "idTransaccion",
+									"value": "{{transaccion}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "ticket",
+			"value": "1702917899049UwUX3Q6TeiEtWNfSl"
+		}
+	]
+}
