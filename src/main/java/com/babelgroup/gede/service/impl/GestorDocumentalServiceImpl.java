@@ -412,26 +412,58 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	private RespuestaGenerica almacenarBinario(File fichero) throws GeneralException {
 		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_OCTET_STREAM);
 
+		// ?parteActual=1&partesTotal=2
+
 		HttpEntity<byte[]> requestEntity;
+		RespuestaGenerica r = null;
 		try {
-			requestEntity = new HttpEntity<>(FileUtils.readFileToByteArray(fichero), headers);
-			ResponseEntity<RespuestaGenerica> response = restTemplate.exchange(gedeApiBinarios, HttpMethod.POST,
-					requestEntity, new ParameterizedTypeReference<RespuestaGenerica>() {
-					});
-			if (HttpStatus.CREATED.equals(response.getStatusCode())) {
-				return response.getBody();
-			} else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
-				intentosLlamadaAPI++;
-				log.info("almacenarBinario() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
-				return almacenarBinario(fichero);
-			} else {
-				throw new GeneralException(
-						"almacenarBinario() - Error al llamar a la API - Superado número de reintentos: "
-								+ response.getStatusCode().toString());
+
+			byte[] readFileToByteArray = FileUtils.readFileToByteArray(fichero);
+
+			// Dividir en partes
+
+			List<byte[]> partes = dividirFicheroPartes(readFileToByteArray);
+
+			for (int i = 0; i < partes.size(); i++) {
+				// requestEntity = new HttpEntity<>(readFileToByteArray, headers);
+
+				requestEntity = new HttpEntity<>(partes.get(i), headers);
+
+				String urlParte = MessageFormat.format(gedeApiBinarios, i + 1, partes.size());
+
+				ResponseEntity<RespuestaGenerica> response = restTemplate.exchange(urlParte, HttpMethod.POST,
+						requestEntity, new ParameterizedTypeReference<RespuestaGenerica>() {
+						});
+				if (HttpStatus.CREATED.equals(response.getStatusCode())) {
+					r = response.getBody();
+				} else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
+					intentosLlamadaAPI++;
+					log.info("almacenarBinario() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
+					return almacenarBinario(fichero);
+				} else {
+					throw new GeneralException(
+							"almacenarBinario() - Error al llamar a la API - Superado número de reintentos: "
+									+ response.getStatusCode().toString());
+				}
 			}
+
 		} catch (IOException e) {
 			throw new GeneralException("almacenarBinario() - Error al leer el fichero a almacenar", e);
 		}
+		return r;
+	}
+
+	private List<byte[]> dividirFicheroPartes(byte[] mainFile) {
+		int sizeMB = 100 * 1024 * 1024;
+		List<byte[]> chunks = new ArrayList<>();
+		for (int i = 0; i < mainFile.length;) {
+			byte[] chunk = new byte[Math.min(sizeMB, mainFile.length - i)];
+			for (int j = 0; j < chunk.length; j++, i++) {
+				chunk[j] = mainFile[i];
+			}
+			chunks.add(chunk);
+		}
+		return chunks;
 	}
 
 	/**
@@ -484,7 +516,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		metadatos.add(new Metadato("nombreFichero", new String[] { nombreDocumento }));
 		metadatos.add(new Metadato("idoc:field_23_1", new String[] { tipoDocumento }));
 		metadatos.add(new Metadato("idiomaDocumento", new String[] { "es" }));
-		metadatos.add(new Metadato("fechaAltaDocumento", new String[] { Instant.now().toString() })); 
+		metadatos.add(new Metadato("fechaAltaDocumento", new String[] { Instant.now().toString() }));
 		metadatos.add(new Metadato("idoc:field_23_13", new String[] { unidadProductora }));
 		metadatos.add(new Metadato("idoc:field_23_14", new String[] { "PDF" }));
 		metadatos.add(new Metadato("idoc:field_23_3", new String[] { organo }));
