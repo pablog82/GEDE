@@ -476,24 +476,129 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		datosAlta.setFormatoBinario("PDF");
 
 //		{
-//		  "deposito": "DEPO_OFICINA",
-//		  "tipoDocumental": "DOCUMENTO", 
-//		  "metadatos": [ 
-//		    {
-//		      "nombre": [
-//		        "doc:field_23_1",
-//				"idoc:field_23_3",
-//				"idoc:field_23_4",
-//				"idoc:field_23_6",
-//				"accesibilidadDocumento",
-//				"fechaAltaDocumento",
-//				"formatoDocumento",
-//				"nombreNaturalDocumento"
-//		      ]
-//		    }
-//		  ],
-//		  "borrador": true,
-//		  "formatoBinario": "PDF"
+//		    "deposito": "DEPO_SIGLAS",
+//		    "identificadorExpediente": null,
+//		    "identificadorCarpeta": null,
+//		    "rutaCarpeta": null,
+//		    "identificadorBinario": "F365617839E74C57A1E12CD53112AC63",
+//		    "formatoBinario": "PDF",
+//		    "metadatos": [
+//		        {
+//		            "nombre": "idoc:field_23_1",
+//		            "valores": ["TD99"]
+//		        },
+//		        {
+//		            "nombre": "idiomaDocumento",
+//		            "valores": [
+//		                "es"
+//		            ]
+//		        },
+//		        {
+//		            "nombre": "fechaAltaDocumento",
+//		            "valores": [
+//		                "2023-12-01T13:18:16+01:00"
+//		            ]
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_11",
+//		            "valores": []
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_12",
+//		            "valores": []
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_13",
+//		            "valores": [
+//		                "SIGGLAS"
+//		            ]
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_14",
+//		            "valores": [
+//		                "PDF"
+//		            ]
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_15",
+//		            "valores": []
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_16",
+//		            "valores": []
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_17",
+//		            "valores": []
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_18",
+//		            "valores": []
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_3",
+//		            "valores": [
+//		                "L01410917"
+//		            ]
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_2",
+//		            "valores": [
+//		                "ES_L01410917_2020_00D1702633622779266677165477"
+//		            ]
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_4",
+//		            "valores": [
+//		                "0"
+//		            ]
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_5",
+//		            "valores": []
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_6",
+//		            "valores": [
+//		                "EE99"
+//		            ]
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_9",
+//		            "valores": []
+//		        },
+//		        {
+//		            "nombre": "accesibilidadDocumento",
+//		            "valores": [
+//		                "R"
+//		            ]
+//		        },
+//		        {
+//		            "nombre": "formatoDocumento",
+//		            "valores": [
+//		                "Electronico"
+//		            ]
+//		        },
+//		        {
+//		            "nombre": "nombreNaturalDocumento",
+//		            "valores": [
+//		                "El nombre del documento"
+//		            ]
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_8",
+//		            "valores": [
+//		                "http://administracionelectronica.gob.es/ENI/XSD/v1.0/documento-e"
+//		            ]
+//		        },
+//		        {
+//		            "nombre": "idoc:field_23_10",
+//		            "valores": []
+//		        }
+//		    ],
+//		    "tipoDocumental": "idoc:type_23",
+//		    "borrador": false,
+//		    "trabajo": true
 //		}
 		return datosAlta;
 	}
