@@ -48,20 +48,19 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
-	/** The Constant PASO_4_PROCESANDO_FICHERO_FICHEROS_EN_LA_CARPETA. */
-	private static final String PASO_4_PROCESANDO_FICHERO_FICHEROS_EN_LA_CARPETA = "PASO 4 - Procesando fichero ficheros en la carpeta: {0}";
-
 	/** The Constant DOCUMENTOS_DE_EXPEDIENTES_ENCONTRADOS. */
 	private static final String DOCUMENTOS_DE_EXPEDIENTES_ENCONTRADOS = "-- Documentos de expedientes encontrados: {0}";
 
-	/** The Constant PASO_2_LISTAR_FICHEROS_EN_LA_CARPETA. */
+	private static final String PASO_1_LISTAR_CARPETAS_DE_EXPEDIENTES = "PASO 1 - Listar carpetas de expedientes";
+
 	private static final String PASO_2_LISTAR_FICHEROS_EN_LA_CARPETA = "PASO 2 - Listar ficheros en la carpeta: {0}";
+
+	private static final String PASO_3_PROCESANDO_FICHERO_FICHEROS_EN_LA_CARPETA = "PASO 3 - Procesando ficheros en la carpeta: {0} -  Fichero: {1}";
 
 	/** The Constant CARPETAS_DE_EXPEDIENTES_ENCONTRADAS. */
 	private static final String CARPETAS_DE_EXPEDIENTES_ENCONTRADAS = "--- Carpetas de expedientes encontradas: {0}";
 
 	/** The Constant PASO_1_LISTAR_CARPETAS_DE_EXPEDIENTES. */
-	private static final String PASO_1_LISTAR_CARPETAS_DE_EXPEDIENTES = "PASO 1 - Listar carpetas de expedientes";
 
 	/** The Constant INICIO_DEL_PROCESO_DE_DOCUMENTOS. */
 	private static final String INICIO_DEL_PROCESO_DE_DOCUMENTOS = "-- INICIO DEL PROCESO DE DOCUMENTOS ---";
@@ -221,8 +220,8 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 				// 4. Procesar fichero
 				for (File ficheroExpediente : listadoFicherosExpediente) {
 
-					log.info(MessageFormat.format(PASO_4_PROCESANDO_FICHERO_FICHEROS_EN_LA_CARPETA,
-							directorioExpediente));
+					log.info(MessageFormat.format(PASO_3_PROCESANDO_FICHERO_FICHEROS_EN_LA_CARPETA,
+							directorioExpediente, ficheroExpediente));
 
 					String nombreDocumento = ficheroExpediente.getName();
 
@@ -413,20 +412,17 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	private RespuestaGenerica almacenarBinario(File fichero) throws GeneralException {
 		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_OCTET_STREAM);
 
-		// ?parteActual=1&partesTotal=2&idBinario=as
-
 		HttpEntity<byte[]> requestEntity;
 		RespuestaGenerica r = null;
 		try {
 
-			byte[] readFileToByteArray = FileUtils.readFileToByteArray(fichero);
+			byte[] bytesFichero = FileUtils.readFileToByteArray(fichero);
 
 			// Dividir en partes
 
-			List<byte[]> partes = dividirFicheroPartes(readFileToByteArray);
+			List<byte[]> partes = dividirFicheroPartes(bytesFichero);
 
 			for (int i = 0; i < partes.size(); i++) {
-				// requestEntity = new HttpEntity<>(readFileToByteArray, headers);
 
 				requestEntity = new HttpEntity<>(partes.get(i), headers);
 
@@ -453,9 +449,9 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 			}
 
 		} catch (IOException e) {
-			throw new GeneralException("almacenarBinario() - Error al leer el fichero a almacenar", e);
+			throw new GeneralException("almacenarBinario() - Error al leer el fichero a almacenar: " + e.getMessage(), e);
 		} catch (RestClientException e) {
-			throw new GeneralException("almacenarBinario() - Error al almacenar el binario", e);
+			throw new GeneralException("almacenarBinario() - Error al almacenar el binario: " + e.getMessage(), e);
 		}
 		return r;
 	}
