@@ -450,6 +450,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 		HttpEntity<byte[]> requestEntity;
 		RespuestaGenerica r = null;
+		String idBinario = "";
 		try {
 
 			byte[] bytesFichero = FileUtils.readFileToByteArray(fichero);
@@ -464,17 +465,20 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 				requestEntity = new HttpEntity<>(partes.get(i), headers);
 
-				String urlParte = MessageFormat.format(gedeApiBinarios, i + 1, partes.size(), hash);
+				String urlParte = MessageFormat.format(gedeApiBinarios, i + 1, partes.size(), hash, idBinario);
 
-				if (i > 0) {
-					urlParte += "&idBinario=" + r.getIdentificador();
-				}
+//				if (i > 0) {
+//					urlParte += "&idBinario=" + r.getIdentificador();
+//				}
+
+				log.info("almacenarBinario() - URL: " + urlParte);
 
 				ResponseEntity<RespuestaGenerica> response = restTemplate.exchange(urlParte, HttpMethod.POST,
 						requestEntity, new ParameterizedTypeReference<RespuestaGenerica>() {
 						});
 				if (HttpStatus.CREATED.equals(response.getStatusCode())) {
 					r = response.getBody();
+					idBinario = r.getIdentificador();
 					log.info("almacenarBinario() - Binario almacenado " + r.toString());
 				} else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
 					intentosLlamadaAPI++;
