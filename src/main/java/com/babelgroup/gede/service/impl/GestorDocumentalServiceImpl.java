@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -136,12 +137,12 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	@Value("${gede.alta.documento.tipoDocumento}")
 	private String tipoDocumento;
 
-	@Value("{gede.alta.documento.serie}")
+	@Value("${gede.alta.documento.serie}")
 	private String serieDocumenal;
 
 	@Value("${gede.alta.documento.firma}")
 	private Boolean firmar;
-	
+
 	@Value("${gede.alta.documento.binario.tamanio.maximo}")
 	private Integer tamanioMaximoBinario;
 
@@ -241,7 +242,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 						RespuestaGenerica respuestaAlmacenarBinario;
 						try {
-							respuestaAlmacenarBinario = almacenarBinario(ficheroExpediente);
+							respuestaAlmacenarBinario = almacenarBinario2(ficheroExpediente);
 						} catch (GeneralException e) {
 							Registro registro = new Registro(expediente, nombreDocumento, null,
 									"Error al almacenar el binario: " + e.getMessage(), "ERROR");
@@ -416,6 +417,38 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_OCTET_STREAM);
 
 		HttpEntity<byte[]> requestEntity;
+		try {
+			requestEntity = new HttpEntity<>(FileUtils.readFileToByteArray(fichero), headers);
+			ResponseEntity<RespuestaGenerica> response = restTemplate.exchange(gedeApiBinarios, HttpMethod.POST,
+					requestEntity, new ParameterizedTypeReference<RespuestaGenerica>() {
+					});
+			if (HttpStatus.CREATED.equals(response.getStatusCode())) {
+				return response.getBody();
+			} else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
+				intentosLlamadaAPI++;
+				log.info("almacenarBinario() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
+				return almacenarBinario(fichero);
+			} else {
+				throw new GeneralException(
+						"almacenarBinario() - Error al llamar a la API - Superado número de reintentos: "
+								+ response.getStatusCode().toString());
+			}
+		} catch (IOException e) {
+			throw new GeneralException("almacenarBinario() - Error al leer el fichero a almacenar", e);
+		}
+	}
+
+	/**
+	 * Almacenar binario.
+	 *
+	 * @param fichero the fichero
+	 * @return the respuesta generica
+	 * @throws GeneralException the general exception
+	 */
+	private RespuestaGenerica almacenarBinario2(File fichero) throws GeneralException {
+		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_OCTET_STREAM);
+
+		HttpEntity<byte[]> requestEntity;
 		RespuestaGenerica r = null;
 		try {
 
@@ -423,16 +456,18 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 			// Dividir en partes
 
+			String hash = DigestUtils.md5Hex(bytesFichero);
+
 			List<byte[]> partes = dividirFicheroPartes(bytesFichero);
 
 			for (int i = 0; i < partes.size(); i++) {
 
 				requestEntity = new HttpEntity<>(partes.get(i), headers);
 
-				String urlParte = MessageFormat.format(gedeApiBinarios, i + 1, partes.size());
+				String urlParte = MessageFormat.format(gedeApiBinarios, i + 1, partes.size(), hash);
 
 				if (i > 0) {
-					urlParte.concat("&idBinario=" + r.getIdentificador());
+					urlParte += "&idBinario=" + r.getIdentificador();
 				}
 
 				ResponseEntity<RespuestaGenerica> response = restTemplate.exchange(urlParte, HttpMethod.POST,
@@ -440,6 +475,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 						});
 				if (HttpStatus.CREATED.equals(response.getStatusCode())) {
 					r = response.getBody();
+					log.info("almacenarBinario() - Binario almacenado " + r.toString());
 				} else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
 					intentosLlamadaAPI++;
 					log.info("almacenarBinario() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
@@ -452,7 +488,8 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 			}
 
 		} catch (IOException e) {
-			throw new GeneralException("almacenarBinario() - Error al leer el fichero a almacenar: " + e.getMessage(), e);
+			throw new GeneralException("almacenarBinario() - Error al leer el fichero a almacenar: " + e.getMessage(),
+					e);
 		} catch (RestClientException e) {
 			throw new GeneralException("almacenarBinario() - Error al almacenar el binario: " + e.getMessage(), e);
 		}
@@ -482,21 +519,31 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	private DocumentoResponse crearDocumento(String nombreDocumento, String idBinario) throws GeneralException {
 		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_JSON);
 		HttpEntity<DatosAltaDocumentoRequest> requestEntity;
+
 		DatosAltaDocumentoRequest datosAlta = generarDatosAltaDocumento(nombreDocumento, idBinario);
 
 		requestEntity = new HttpEntity<>(datosAlta, headers);
-		ResponseEntity<DocumentoResponse> response = restTemplate.exchange(gedeApiDocumentosCrear, HttpMethod.POST,
-				requestEntity, new ParameterizedTypeReference<DocumentoResponse>() {
-				});
-		if (HttpStatus.CREATED.equals(response.getStatusCode())) {
-			return response.getBody();
-		} else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
-			intentosLlamadaAPI++;
-			log.info("crearDocumento() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
-			return crearDocumento(nombreDocumento, idBinario);
-		} else {
-			throw new GeneralException("crearDocumento() - Error al llamar a la API - Superado número de reintentos: "
-					+ response.getStatusCode().toString());
+
+		try {
+			ResponseEntity<DocumentoResponse> response = restTemplate.exchange(gedeApiDocumentosCrear, HttpMethod.POST,
+					requestEntity, new ParameterizedTypeReference<DocumentoResponse>() {
+					});
+			if (HttpStatus.CREATED.equals(response.getStatusCode())) {
+
+				DocumentoResponse r = response.getBody();
+				log.info("crearDocumento() - Documento creado  id: " + r.getIdentificador());
+				return r;
+			} else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
+				intentosLlamadaAPI++;
+				log.info("crearDocumento() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
+				return crearDocumento(nombreDocumento, idBinario);
+			} else {
+				throw new GeneralException(
+						"crearDocumento() - Error al llamar a la API - Superado número de reintentos: "
+								+ response.getStatusCode().toString());
+			}
+		} catch (RestClientException e) {
+			throw new GeneralException("crearDocumento() - Error al almacenar el documento: " + e.getMessage(), e);
 		}
 	}
 
