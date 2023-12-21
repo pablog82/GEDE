@@ -46,16 +46,21 @@ import lombok.extern.log4j.Log4j2;
  * The Class GestorDocumentalServiceImpl.
  */
 @Service
+
+/** The Constant log. */
 @Log4j2
 public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 	/** The Constant DOCUMENTOS_DE_EXPEDIENTES_ENCONTRADOS. */
 	private static final String DOCUMENTOS_DE_EXPEDIENTES_ENCONTRADOS = "-- Documentos de expedientes encontrados: {0}";
 
+	/** The Constant PASO_1_LISTAR_CARPETAS_DE_EXPEDIENTES. */
 	private static final String PASO_1_LISTAR_CARPETAS_DE_EXPEDIENTES = "PASO 1 - Listar carpetas de expedientes";
 
+	/** The Constant PASO_2_LISTAR_FICHEROS_EN_LA_CARPETA. */
 	private static final String PASO_2_LISTAR_FICHEROS_EN_LA_CARPETA = "PASO 2 - Listar ficheros en la carpeta: {0}";
 
+	/** The Constant PASO_3_PROCESANDO_FICHERO_FICHEROS_EN_LA_CARPETA. */
 	private static final String PASO_3_PROCESANDO_FICHERO_FICHEROS_EN_LA_CARPETA = "PASO 3 - Procesando ficheros en la carpeta: {0} -  Fichero: {1}";
 
 	/** The Constant CARPETAS_DE_EXPEDIENTES_ENCONTRADAS. */
@@ -110,39 +115,49 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	@Value("${fase}")
 	private Integer fase;
 
+	/** The deposito. */
 	@Value("${gede.alta.documento.deposito}")
 	private String deposito;
 
+	/** The tipo documental. */
 	@Value("${gede.alta.documento.tipoDocumental}")
 	private String tipoDocumental;
 
+	/** The formato. */
 	@Value("${gede.alta.documento.formato}")
 	private String formato;
 
+	/** The accesibilidad documento. */
 	@Value("${gede.alta.documento.accesibilidadDocumento}")
 	private String accesibilidadDocumento;
 
+	/** The estado elaboracion. */
 	@Value("${gede.alta.documento.estadoElaboracion}")
 	private String estadoElaboracion;
 
+	/** The origen. */
 	@Value("${gede.alta.documento.origen}")
 	private String origen;
 
+	/** The organo. */
 	@Value("${gede.alta.documento.organo}")
 	private String organo;
 
+	/** The unidad productora. */
 	@Value("${gede.alta.documento.unidadProductora}")
 	private String unidadProductora;
 
+	/** The tipo documento. */
 	@Value("${gede.alta.documento.tipoDocumento}")
 	private String tipoDocumento;
 
 	@Value("${gede.alta.documento.serie}")
 	private String serieDocumenal;
 
+	/** The firmar. */
 	@Value("${gede.alta.documento.firma}")
 	private Boolean firmar;
-
+	
 	@Value("${gede.alta.documento.binario.tamanio.maximo}")
 	private Integer tamanioMaximoBinario;
 
@@ -393,7 +408,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	 *
 	 * @param contentType the content type
 	 * @return the http headers
-	 * @throws GeneralException
+	 * @throws GeneralException the general exception
 	 */
 	private HttpHeaders cabeceraConTicket(MediaType contentType) throws GeneralException {
 		if (!validarTicket()) {
@@ -500,6 +515,12 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		return r;
 	}
 
+	/**
+	 * Dividir fichero partes.
+	 *
+	 * @param mainFile the main file
+	 * @return the list
+	 */
 	private List<byte[]> dividirFicheroPartes(byte[] mainFile) {
 		int sizeMB = tamanioMaximoBinario * 1024 * 1024;
 		List<byte[]> chunks = new ArrayList<>();
@@ -516,7 +537,8 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	/**
 	 * Crear documento.
 	 *
-	 * @param idBinario the id binario
+	 * @param nombreDocumento the nombre documento
+	 * @param idBinario       the id binario
 	 * @return the documento response
 	 * @throws GeneralException the general exception
 	 */
@@ -554,7 +576,8 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	/**
 	 * Generar datos alta.
 	 *
-	 * @param idBinario the id binario
+	 * @param nombreDocumento the nombre documento
+	 * @param idBinario       the id binario
 	 * @return the datos alta documento request
 	 */
 	private DatosAltaDocumentoRequest generarDatosAltaDocumento(String nombreDocumento, String idBinario) {
