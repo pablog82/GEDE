@@ -133,7 +133,10 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 	/** The tipo documental. */
 	@Value("${gede.alta.documento.tipoDocumental}")
-	private String tipoDocumental;
+	private String tipoDocumentalDocumento;
+
+	@Value("${gede.alta.expediente.tipoDocumental}")
+	private String tipoDocumentalExpediente;
 
 	/** The formato. */
 	@Value("${gede.alta.documento.formato}")
@@ -263,7 +266,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 					if (registros.isEmpty()) {
 
-						// TODO Obetener el numero de expediente
+						// Obetener el numero de expediente
 
 						String nombreFichero = ficheroExpediente.getName();
 
@@ -271,8 +274,13 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 						String numeroExpediente = split[1];
 
+						intentosLlamadaAPI = 0;
+
+						// 4.2. Crear expediente
+						
 						ExpedienteResponse expedienteResponse = crearExpediente(numeroExpediente, numeroExpediente,
 								numeroExpediente, numeroExpediente);
+
 						String identificadorExpediente = expedienteResponse.getIdentificador();
 
 						// 4.2. Almacenar binario
@@ -281,7 +289,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 						RespuestaGenerica respuestaAlmacenarBinario;
 						try {
-							respuestaAlmacenarBinario = almacenarBinario2(ficheroExpediente);
+							respuestaAlmacenarBinario = almacenarBinario(ficheroExpediente);
 						} catch (GeneralException e) {
 							Registro registro = new Registro(expediente, nombreDocumento, null,
 									"Error al almacenar el binario: " + e.getMessage(), "ERROR");
@@ -646,7 +654,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 			String mes, String anyo) {
 		DatosAltaExpedienteRequest datosAlta = new DatosAltaExpedienteRequest();
 		datosAlta.setDeposito(deposito);
-		datosAlta.setTipoDocumental(tipoDocumental);
+		datosAlta.setTipoDocumental(tipoDocumentalExpediente);
 		datosAlta.setBorrador(false);
 
 		// Metadatos
@@ -677,7 +685,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		datosAlta.setIdentificadorExpediente(identificadorExpediente);
 		datosAlta.setIdentificadorBinario(idBinario);
 		datosAlta.setFormatoBinario("PDF");
-		datosAlta.setTipoDocumental(tipoDocumental);
+		datosAlta.setTipoDocumental(tipoDocumentalDocumento);
 		datosAlta.setBorrador(false);
 		datosAlta.setTrabajo(true);
 
