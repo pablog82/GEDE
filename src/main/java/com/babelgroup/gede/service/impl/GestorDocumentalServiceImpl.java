@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -26,8 +27,10 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.babelgroup.gede.dto.DatosAltaDocumentoRequest;
+import com.babelgroup.gede.dto.DatosAltaExpedienteRequest;
 import com.babelgroup.gede.dto.DatosAltaFirmantesRequest;
 import com.babelgroup.gede.dto.DocumentoResponse;
+import com.babelgroup.gede.dto.ExpedienteResponse;
 import com.babelgroup.gede.dto.FirmaResponse;
 import com.babelgroup.gede.dto.Metadato;
 import com.babelgroup.gede.dto.RespuestaGenerica;
@@ -44,6 +47,12 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * The Class GestorDocumentalServiceImpl.
+ */
+/**
+ * 
+ */
+/**
+ * 
  */
 @Service
 
@@ -111,6 +120,9 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	@Value("${gede.api.documentos.cerrar}")
 	private String gedeApiDocumentosCerrar;
 
+	@Value("${gede.api.expedientes.crear}")
+	private String gedeApiExpedientesCrear;
+
 	/** The fase. */
 	@Value("${fase}")
 	private Integer fase;
@@ -157,7 +169,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	/** The firmar. */
 	@Value("${gede.alta.documento.firma}")
 	private Boolean firmar;
-	
+
 	@Value("${gede.alta.documento.binario.tamanio.maximo}")
 	private Integer tamanioMaximoBinario;
 
@@ -251,6 +263,18 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 					if (registros.isEmpty()) {
 
+						// TODO Obetener el numero de expediente
+
+						String nombreFichero = ficheroExpediente.getName();
+
+						String[] split = nombreFichero.split("-");
+
+						String numeroExpediente = split[1];
+
+						ExpedienteResponse expedienteResponse = crearExpediente(numeroExpediente, numeroExpediente,
+								numeroExpediente, numeroExpediente);
+						String identificadorExpediente = expedienteResponse.getIdentificador();
+
 						// 4.2. Almacenar binario
 
 						intentosLlamadaAPI = 0;
@@ -272,7 +296,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 						DocumentoResponse responseCrearDocumento;
 						try {
 							responseCrearDocumento = crearDocumento(nombreDocumento,
-									respuestaAlmacenarBinario.getIdentificador());
+									respuestaAlmacenarBinario.getIdentificador(), identificadorExpediente);
 						} catch (GeneralException e) {
 							Registro registro = new Registro(expediente, nombreDocumento, null,
 									"Error al crear el documento: " + e.getMessage(), "ERROR");
@@ -534,6 +558,38 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		return chunks;
 	}
 
+	private ExpedienteResponse crearExpediente(String nombreExpediente, String idExpediente, String mes, String anyo)
+			throws GeneralException {
+		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_JSON);
+		HttpEntity<DatosAltaExpedienteRequest> requestEntity;
+
+		DatosAltaExpedienteRequest datosAlta = generarDatosAltaExpediente(nombreExpediente, idExpediente, mes, anyo);
+
+		requestEntity = new HttpEntity<>(datosAlta, headers);
+
+		try {
+			ResponseEntity<ExpedienteResponse> response = restTemplate.exchange(gedeApiExpedientesCrear,
+					HttpMethod.POST, requestEntity, new ParameterizedTypeReference<ExpedienteResponse>() {
+					});
+			if (HttpStatus.CREATED.equals(response.getStatusCode())) {
+
+				ExpedienteResponse r = response.getBody();
+				log.info("crearDocumento() - Documento creado  id: " + r.getIdentificador());
+				return r;
+			} else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
+				intentosLlamadaAPI++;
+				log.info("crearDocumento() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
+				return crearExpediente(nombreExpediente, idExpediente, mes, anyo);
+			} else {
+				throw new GeneralException(
+						"crearExpediente() - Error al llamar a la API - Superado número de reintentos: "
+								+ response.getStatusCode().toString());
+			}
+		} catch (RestClientException e) {
+			throw new GeneralException("crearExpediente() - Error al almacenar el documento: " + e.getMessage(), e);
+		}
+	}
+
 	/**
 	 * Crear documento.
 	 *
@@ -542,11 +598,13 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	 * @return the documento response
 	 * @throws GeneralException the general exception
 	 */
-	private DocumentoResponse crearDocumento(String nombreDocumento, String idBinario) throws GeneralException {
+	private DocumentoResponse crearDocumento(String nombreDocumento, String idBinario, String identificadorExpediente)
+			throws GeneralException {
 		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_JSON);
 		HttpEntity<DatosAltaDocumentoRequest> requestEntity;
 
-		DatosAltaDocumentoRequest datosAlta = generarDatosAltaDocumento(nombreDocumento, idBinario);
+		DatosAltaDocumentoRequest datosAlta = generarDatosAltaDocumento(nombreDocumento, idBinario,
+				identificadorExpediente);
 
 		requestEntity = new HttpEntity<>(datosAlta, headers);
 
@@ -562,7 +620,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 			} else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
 				intentosLlamadaAPI++;
 				log.info("crearDocumento() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
-				return crearDocumento(nombreDocumento, idBinario);
+				return crearDocumento(nombreDocumento, idBinario, identificadorExpediente);
 			} else {
 				throw new GeneralException(
 						"crearDocumento() - Error al llamar a la API - Superado número de reintentos: "
@@ -573,6 +631,38 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		}
 	}
 
+	/*
+	 * { "deposito": "DEPO_OFICINA", "tipoDocumental": "idoc:type_22", "borrador":
+	 * false, "metadatos": [ { "nombre": "nombreNaturalExpediente", "valores":
+	 * ["Expediente de prueba carga Expedientes HistOricos"] }, { "nombre":
+	 * "formatoExpediente", "valores": ["Electronico"] }, { "nombre":
+	 * "idoc:field_22_9", "valores": ["L01410917"] }, { "nombre": "idoc:field_22_4",
+	 * "valores": ["SAETAS"] }, { "nombre": "idExpediente", "valores":
+	 * ["008/2001/HST/Archivo-1"] }, { "nombre": "idoc:field_22_13", "valores":
+	 * ["008/2001"] }, { "nombre": "serieExpediente", "valores":
+	 * ["00S170003410384931769341013709"] } ] }
+	 */
+	private DatosAltaExpedienteRequest generarDatosAltaExpediente(String nombreExpediente, String idExpediente,
+			String mes, String anyo) {
+		DatosAltaExpedienteRequest datosAlta = new DatosAltaExpedienteRequest();
+		datosAlta.setDeposito(deposito);
+		datosAlta.setTipoDocumental(tipoDocumental);
+		datosAlta.setBorrador(false);
+
+		// Metadatos
+		List<Metadato> metadatos = new ArrayList<Metadato>();
+		metadatos.add(new Metadato("nombreNaturalExpediente", new String[] { nombreExpediente }));
+		metadatos.add(new Metadato("formatoExpediente", new String[] { formato }));
+		metadatos.add(new Metadato("idoc:field_22_9", new String[] { organo }));
+		metadatos.add(new Metadato("idoc:field_22_4", new String[] { gedeOrganismo }));
+		metadatos.add(new Metadato("idExpediente", new String[] { idExpediente }));
+		metadatos.add(new Metadato("idoc:field_22_13", new String[] { idExpediente }));// TODO Mes año
+		metadatos.add(new Metadato("serieExpediente", new String[] { serieDocumenal }));
+
+		datosAlta.setMetadatos(metadatos);
+		return datosAlta;
+	}
+
 	/**
 	 * Generar datos alta.
 	 *
@@ -580,10 +670,11 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	 * @param idBinario       the id binario
 	 * @return the datos alta documento request
 	 */
-	private DatosAltaDocumentoRequest generarDatosAltaDocumento(String nombreDocumento, String idBinario) {
+	private DatosAltaDocumentoRequest generarDatosAltaDocumento(String nombreDocumento, String idBinario,
+			String identificadorExpediente) {
 		DatosAltaDocumentoRequest datosAlta = new DatosAltaDocumentoRequest();
 		datosAlta.setDeposito(deposito);
-		datosAlta.setIdentificadorExpediente(null);
+		datosAlta.setIdentificadorExpediente(identificadorExpediente);
 		datosAlta.setIdentificadorBinario(idBinario);
 		datosAlta.setFormatoBinario("PDF");
 		datosAlta.setTipoDocumental(tipoDocumental);

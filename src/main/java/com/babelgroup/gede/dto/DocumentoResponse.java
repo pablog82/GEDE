@@ -18,6 +18,8 @@ public class DocumentoResponse {
 	private Integer codigoRespuesta;
 	private String identificador;
 	private List<ErrorValidacion> erroresValidacion;
+
+	
 //	private DatosDocumento datosDocumento;
 //	private List<Metadato> metadatos;
 //	private SerieRelacionada serie;
@@ -469,4 +471,5 @@ public class DocumentoResponse {
 //	    ]
 //	    
 //	}
+	
 }
