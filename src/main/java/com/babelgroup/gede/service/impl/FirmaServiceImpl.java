@@ -3,14 +3,21 @@ package com.babelgroup.gede.service.impl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.ws.soap.SOAPFaultException;
 
+import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.endpoint.Endpoint;
 import org.apache.cxf.frontend.ClientProxy;
@@ -115,6 +122,43 @@ public class FirmaServiceImpl implements FirmaService {
 			httpClientPolicy.setAllowChunking(false);
 			httpConduit.setClient(httpClientPolicy);
 
+			try {
+				SSLContext ctx = SSLContext.getInstance("TLS");
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			TLSClientParameters params = httpConduit.getTlsClientParameters();
+
+			if (params == null) {
+				params = new TLSClientParameters();
+				httpConduit.setTlsClientParameters(params);
+			}
+
+			params.setTrustManagers(new TrustManager[] { new X509TrustManager() {
+
+				@Override
+				public X509Certificate[] getAcceptedIssuers() {
+					// TODO Auto-generated method stub
+					return null;
+				}
+
+				@Override
+				public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+					// TODO Auto-generated method stub
+
+				}
+
+				@Override
+				public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+					// TODO Auto-generated method stub
+
+				}
+			} });
+
+			params.setDisableCNCheck(true);
+
 			outProps.put(ConfigurationConstants.ACTION, "UsernameToken Timestamp");
 			outProps.put(ConfigurationConstants.PASSWORD_TYPE, "PasswordText");
 			outProps.put(ConfigurationConstants.USER, afirmaUsername);
@@ -125,7 +169,7 @@ public class FirmaServiceImpl implements FirmaService {
 			WSS4JOutInterceptor wssOut = new WSS4JOutInterceptor(outProps); // request
 			cxfEndpoint.getOutInterceptors().add(wssOut);
 
-			java.lang.String signDssXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>  <dss:SignRequest Profile='urn:afirma:dss:1.0:profile:XSS' xmlns:ds='http://www.w3.org/2000/09/xmldsig#' xmlns:dss='urn:oasis:names:tc:dss:1.0:core:schema' xmlns:afxp='urn:afirma:dss:1.0:profile:XSS:schema' xmlns:ades='urn:oasis:names:tc:dss:1.0:profiles:AdES:schema#' xmlns:sigpol='urn:oasis:names:tc:dss-x:1.0:profiles:SignaturePolicy:schema#'>"
+			java.lang.String signDssXMLs = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>  <dss:SignRequest Profile='urn:afirma:dss:1.0:profile:XSS' xmlns:ds='http://www.w3.org/2000/09/xmldsig#' xmlns:dss='urn:oasis:names:tc:dss:1.0:core:schema' xmlns:afxp='urn:afirma:dss:1.0:profile:XSS:schema' xmlns:ades='urn:oasis:names:tc:dss:1.0:profiles:AdES:schema#' xmlns:sigpol='urn:oasis:names:tc:dss-x:1.0:profiles:SignaturePolicy:schema#'>"
 					+ "<dss:InputDocuments xmlns:dss='urn:oasis:names:tc:dss:1.0:core:schema'>"
 					+ " <dss:Document xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\"> "
 					+ "                <dss:Base64Data xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\">"
@@ -134,7 +178,9 @@ public class FirmaServiceImpl implements FirmaService {
 					+ " <dss:OptionalInputs xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\"> "
 					+ "        <dss:ClaimedIdentity xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\"> "
 					+ "                        <dss:Name xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\">"
-					+ afirmaClaimedIdentity + "</dss:Name> " + "        </dss:ClaimedIdentity> "
+					+ 
+					afirmaClaimedIdentity + 
+					"</dss:Name> " + "        </dss:ClaimedIdentity> "
 					+ "        <dss:KeySelector xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\"> "
 					+ "                        <ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"> "
 					+ "                                        <ds:KeyName>" + afirmaKeyName + "</ds:KeyName> "
@@ -151,6 +197,43 @@ public class FirmaServiceImpl implements FirmaService {
 					+ "<sigpol:SignaturePolicyIdentifier>urn:oid:2.16.724.1.3.1.1.2.1.9</sigpol:SignaturePolicyIdentifier>"
 					+ "</sigpol:GenerateUnderSignaturePolicy>" + " <dss:IncludeEContent/> "
 					+ " <afxp:IgnoreGracePeriod/> " + " </dss:OptionalInputs> " + " </dss:SignRequest>";
+			
+			java.lang.String signDssXML ="<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+					"<dss:SignRequest Profile=\"urn:afirma:dss:1.0:profile:XSS\" " +
+					                 "xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" " + 
+					                 "xmlns:afxp=\"urn:afirma:dss:1.0:profile:XSS:schema\" xmlns:ades=\"urn:oasis:names:tc:dss:1.0:profiles:AdES:schema#\" " +
+					                 "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
+					                 "xmlns:cmism=\"http://docs.oasis-open.org/ns/cmis/messaging/200908/\" " +
+					                 "xmlns:sigpol=\"urn:oasis:names:tc:dss-x:1.0:profiles:SignaturePolicy:schema#\" " +
+					                 "xmlns:xss=\"urn:oasis:names:tc:dss:1.0:profiles:XSS\">" +
+					    "<dss:InputDocuments>"+
+					        "<dss:Document>"+
+					            "<dss:Base64Data>"+
+					        justificanteRecibido +
+					            "</dss:Base64Data>"+
+					        "</dss:Document>"+
+					    "</dss:InputDocuments >"+
+					    "<dss:OptionalInputs>"+
+					        "<dss:ClaimedIdentity>"+
+					            "<dss:Name>"+
+					            afirmaClaimedIdentity + 
+					            "</dss:Name>"+
+					        "</dss:ClaimedIdentity>"+
+					        "<dss:KeySelector>"+
+					            "<ds:KeyInfo>"+
+					                "<ds:KeyName>"+
+					                afirmaKeyName + 
+					                "</ds:KeyName>"+
+					            "</ds:KeyInfo>"+
+					        "</dss:KeySelector>"+
+					        "<dss:SignatureType>"+ 
+					        afirmaSignatureTypePdf + 
+					        "</dss:SignatureType>"+
+					        "<ades:SignatureForm>" +
+					        afirmaSignatureFormPdf +
+					        "</ades:SignatureForm>"+
+					    "</dss:OptionalInputs>"+
+					"</dss:SignRequest>";
 
 			// Se realiza la firma
 			justificanteFirmado = port.sign(signDssXML);

@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<dss:SignRequest Profile="urn:afirma:dss:1.0:profile:XSS"
-                 xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
-                 xmlns:afxp="urn:afirma:dss:1.0:profile:XSS:schema" xmlns:ades="urn:oasis:names:tc:dss:1.0:profiles:AdES:schema#"
-                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                 xmlns:cmism="http://docs.oasis-open.org/ns/cmis/messaging/200908/"
-                 xmlns:sigpol="urn:oasis:names:tc:dss-x:1.0:profiles:SignaturePolicy:schema#"
-                 xmlns:xss="urn:oasis:names:tc:dss:1.0:profiles:XSS">
+<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<dss:SignRequest Profile=\"urn:afirma:dss:1.0:profile:XSS\"
+                 xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"
+                 xmlns:afxp=\"urn:afirma:dss:1.0:profile:XSS:schema\" xmlns:ades=\"urn:oasis:names:tc:dss:1.0:profiles:AdES:schema#\"
+                 xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+                 xmlns:cmism=\"http://docs.oasis-open.org/ns/cmis/messaging/200908/\"
+                 xmlns:sigpol=\"urn:oasis:names:tc:dss-x:1.0:profiles:SignaturePolicy:schema#\"
+                 xmlns:xss=\"urn:oasis:names:tc:dss:1.0:profiles:XSS\">
     <dss:InputDocuments>
         <dss:Document>
             <dss:Base64Data>
@@ -25,3 +25,13 @@
         <ades:SignatureForm></ades:SignatureForm>
     </dss:OptionalInputs>
 </dss:SignRequest>
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<dss:SignResponse xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Profile="urn:afirma:dss:1.0:profile:XSS" xsi:schemaLocation="urn:oasis:names:tc:dss:1.0:core:schema http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-schema-v1.0-os.xsd">
+   <dss:Result>
+      <dss:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError</dss:ResultMajor>
+      <dss:ResultMinor>urn:oasis:names:tc:dss:1.0:resultminor:invalid:KeyLookupFailed</dss:ResultMinor>
+      <dss:ResultMessage xml:lang="es">[COD_091]: ERROR: La aplicacion peoplenet no puede emplear el certificado servidor Sello Electronico AYSE en firmas servidor</dss:ResultMessage>
+   </dss:Result>
+</dss:SignResponse>
