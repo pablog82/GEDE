@@ -25,7 +25,7 @@ public class RegistroAspect {
 		if (count == 0) {
 //			log.info("Inicializando la base de datos");
 			jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS registro(id INTEGER PRIMARY KEY AUTOINCREMENT,"
-					+ "	expediente TEXT NOT NULL," + "	documento TEXT NOT NULL," + "	referenciaRepositorio TEXT,"
+					+ "	expediente TEXT NOT NULL," + "	identificadorExpediente TEXT," + "	documento TEXT NOT NULL," + "	referenciaRepositorio TEXT,"
 					+ "	observaciones TEXT," + "	estado TEXT)");
 		}
 	}

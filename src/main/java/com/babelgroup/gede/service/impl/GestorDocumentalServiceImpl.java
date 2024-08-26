@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -356,32 +357,32 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
                             Registro registro = new Registro(
                                     expediente,
                                     identificadorExpediente,
-                                    nombreDocumento, null,
+                                    nombreDocumento, "error",
                                     "Error al almacenar el binario: " + e.getMessage(),
                                     "ERROR");
                             registroService.insert(registro);
-                            throw new GeneralException(e);
+                          //  throw new GeneralException(e);
                         }
 
                         intentosLlamadaAPI = 0;
 
                         // 4.3. Crear documento
 
-                        DocumentoResponse responseCrearDocumento;
-                        try {
-                            responseCrearDocumento = crearDocumento(nombreDocumento,
-                                    respuestaAlmacenarBinario.getIdentificador(), identificadorExpediente);
-                        } catch (GeneralException e) {
-                            Registro registro = new Registro(
-                                    expediente,
-                                    identificadorExpediente,
-                                    nombreDocumento,
-                                    null,
-                                    "Error al crear el documento: " + e.getMessage(),
-                                    "ERROR");
-                            registroService.insert(registro);
-                            throw new GeneralException(e);
-                        }
+//                        DocumentoResponse responseCrearDocumento;
+//                        try {
+//                            responseCrearDocumento = crearDocumento(nombreDocumento,
+//                                    respuestaAlmacenarBinario.getIdentificador(), identificadorExpediente);
+//                        } catch (GeneralException e) {
+//                            Registro registro = new Registro(
+//                                    expediente,
+//                                    identificadorExpediente,
+//                                    nombreDocumento,
+//                                    null,
+//                                    "Error al crear el documento: " + e.getMessage(),
+//                                    "ERROR");
+//                            registroService.insert(registro);
+//                            throw new GeneralException(e);
+//                        }
 
                         if (firmar) {
                             // 4.4. Firmar
@@ -389,12 +390,12 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
                             String justificanteBase64 = EncodeDecode
                                     .encode(Files.readAllBytes(ficheroExpediente.toPath()));
 
-//									String firmarJustificante = firmaService.firmarJustificante(justificanteBase64);
+									String firmarJustificante = firmaService.firmarJustificante(justificanteBase64);
 
-//									FileUtils.writeByteArrayToFile(
-//											new File(ficheroExpediente.getAbsolutePath().toUpperCase().replace(".PDF",
-//													UUID.randomUUID().toString() + "_FIRMADO.PDF")),
-//											EncodeDecode.decode(firmarJustificante));
+									FileUtils.writeByteArrayToFile(
+											new File(ficheroExpediente.getAbsolutePath().toUpperCase().replace(".PDF",
+													UUID.randomUUID().toString() + "_FIRMADO.PDF")),
+											EncodeDecode.decode(firmarJustificante));
 
                             // 4.5 Almacenar firmantes
 
@@ -417,30 +418,30 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
                             // 4.6 Cerrar documento
                             intentosLlamadaAPI = 0;
 
-                            try {
-                                cerrarDocumento(responseCrearDocumento.getIdentificador());
-                            } catch (GeneralException e) {
-                                Registro registro = new Registro(
-                                        expediente,
-                                        identificadorExpediente,
-                                        nombreDocumento,
-                                        null,
-                                        "Error al cerrar el documento: " + e.getMessage(),
-                                        "ERROR");
-                                registroService.insert(registro);
-                                throw new GeneralException(e);
-                            }
+//                            try {
+//                                cerrarDocumento(responseCrearDocumento.getIdentificador());
+//                            } catch (GeneralException e) {
+//                                Registro registro = new Registro(
+//                                        expediente,
+//                                        identificadorExpediente,
+//                                        nombreDocumento,
+//                                        null,
+//                                        "Error al cerrar el documento: " + e.getMessage(),
+//                                        "ERROR");
+//                                registroService.insert(registro);
+//                                throw new GeneralException(e);
+//                            }
                         }
 
                         // 4.6 Registar en base de datos
-                        Registro registro = new Registro(
-                                expediente,
-                                identificadorExpediente,
-                                nombreDocumento,
-                                responseCrearDocumento.getIdentificador(),
-                                "Documento almacenado",
-                                "OK - [firmado: " + firmar + "]");
-                        registroService.insert(registro);
+//                        Registro registro = new Registro(
+//                                expediente,
+//                                identificadorExpediente,
+//                                nombreDocumento,
+//                                responseCrearDocumento.getIdentificador(),
+//                                "Documento almacenado",
+//                                "OK - [firmado: " + firmar + "]");
+//                        registroService.insert(registro);
                     } else {
                         log.info("Ya se ha procesado el documento");
                     }
@@ -565,7 +566,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
                         "almacenarBinario() - Error al llamar a la API - Superado número de reintentos: "
                                 + response.getStatusCode().toString());
             }
-        } catch (IOException e) {
+        } catch (IOException | RestClientException e) {
             throw new GeneralException("almacenarBinario() - Error al leer el fichero a almacenar", e);
         }
     }
@@ -667,11 +668,11 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
             if (HttpStatus.CREATED.equals(response.getStatusCode())) {
 
                 ExpedienteResponse r = response.getBody();
-                log.info("crearDocumento() - Documento creado  id: " + r.getIdentificador());
+                log.info("crearExpediente() - Expediente creado  id: " + r.getIdentificador());
                 return r;
             } else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
                 intentosLlamadaAPI++;
-                log.info("crearDocumento() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
+                log.info("crearExpediente() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
                 return crearExpediente(nombreExpediente, idExpediente, mes, anyo);
             } else {
                 throw new GeneralException(
@@ -679,7 +680,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
                                 + response.getStatusCode().toString());
             }
         } catch (RestClientException e) {
-            throw new GeneralException("crearExpediente() - Error al almacenar el documento: " + e.getMessage(), e);
+            throw new GeneralException("crearExpediente() - Error al almacenar el expediente: " + e.getMessage(), e);
         }
     }
 
