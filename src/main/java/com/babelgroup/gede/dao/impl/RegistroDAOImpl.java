@@ -20,75 +20,95 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class RegistroDAOImpl implements RegistroDAO {
 
-	/** The insert sql. */
-	private String INSERT_SQL = "INSERT INTO registro(expediente,documento,referenciaRepositorio,observaciones,estado) values (?,?,?,?,?)";
+    public static final String SELECT_SQL = "SELECT id,expediente,identificadorExpediente, documento,referenciaRepositorio,observaciones,estado FROM registro";
+    /**
+     * The insert sql.
+     */
+    private static final String INSERT_SQL = "INSERT INTO registro(expediente,identificadorExpediente, documento,referenciaRepositorio,observaciones,estado) values (?,?,?,?,?,?)";
 
-	/** The jdbc template. */
-	@Lazy
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
+    /**
+     * The jdbc template.
+     */
+    @Lazy
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-	/**
-	 * Insert.
-	 *
-	 * @param registro the registro
-	 */
-	@Override
-	public int insert(Registro registro) {
-		log.info("Insertando registro: " + registro.toString());
-		Object[] params = { registro.getExpediente(), registro.getDocumento(), registro.getReferenciaRepositorio(),
-				registro.getObservaciones(), registro.getEstado() };
+    /**
+     * Insert.
+     *
+     * @param registro the registro
+     */
+    @Override
+    public int insert(Registro registro) {
+        log.info("Insertando registro: " + registro.toString());
+        Object[] params = {registro.getExpediente(), registro.getDocumento(), registro.getReferenciaRepositorio(),
+                registro.getObservaciones(), registro.getEstado()};
 
-		int[] types = { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER };
-		return this.jdbcTemplate.update(INSERT_SQL, params, types);
-	}
+        int[] types = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER};
+        return this.jdbcTemplate.update(INSERT_SQL, params, types);
+    }
 
-	/**
-	 * Find all.
-	 *
-	 * @return the list
-	 */
-	@Override
-	public List<Registro> findAll() {
-		return jdbcTemplate.query(
-				"SELECT id,expediente,documento,referenciaRepositorio,observaciones,estado FROM registro",
+    /**
+     * Find all.
+     *
+     * @return the list
+     */
+    @Override
+    public List<Registro> findAll() {
+        return jdbcTemplate.query(
+                SELECT_SQL,
 
-				(resultSet, rowNum) -> new Registro(resultSet.getInt("id"), resultSet.getString("expediente"),
-						resultSet.getString("documento"), resultSet.getString("referenciaRepositorio"),
-						resultSet.getString("observaciones"), resultSet.getString("estado")));
-	}
+                (resultSet, rowNum) -> new Registro(
+                        resultSet.getInt("id"),
+                        resultSet.getString("expediente"),
+                        resultSet.getString("identificadorExpediente"),
+                        resultSet.getString("documento"),
+                        resultSet.getString("referenciaRepositorio"),
+                        resultSet.getString("observaciones"),
+                        resultSet.getString("estado")));
+    }
 
-	/**
-	 * Find all by expediente.
-	 *
-	 * @param expediente the expediente
-	 * @return the list
-	 */
-	@Override
-	public List<Registro> findAllByExpediente(String expediente) {
-		return jdbcTemplate.query(
-				"SELECT id,expediente,documento,referenciaRepositorio,observaciones,estado FROM registro WHERE expediente = '"
-						+ expediente + "'",
+    /**
+     * Find all by expediente.
+     *
+     * @param expediente the expediente
+     * @return the list
+     */
+    @Override
+    public List<Registro> findAllByExpediente(String expediente) {
+        return jdbcTemplate.query(
+                SELECT_SQL + " WHERE expediente = '"
+                        + expediente + "'",
 
-				(resultSet, rowNum) -> new Registro(resultSet.getInt("id"), resultSet.getString("expediente"),
-						resultSet.getString("documento"), resultSet.getString("referenciaRepositorio"),
-						resultSet.getString("observaciones"), resultSet.getString("estado")));
-	}
+                (resultSet, rowNum) -> new Registro(
+                        resultSet.getInt("id"),
+                        resultSet.getString("expediente"),
+                        resultSet.getString("identificadorExpediente"),
+                        resultSet.getString("documento"),
+                        resultSet.getString("referenciaRepositorio"),
+                        resultSet.getString("observaciones"),
+                        resultSet.getString("estado")));
+    }
 
-	@Override
-	public List<Registro> findByExpedienteAndDocumento(String expediente, String documento) {
-		return jdbcTemplate.query(
-				"SELECT id,expediente,documento,referenciaRepositorio,observaciones,estado FROM registro WHERE expediente = '"
-						+ expediente + "' AND documento = '" + documento + "'",
+    @Override
+    public List<Registro> findByExpedienteAndDocumento(String expediente, String documento) {
+        return jdbcTemplate.query(
+                SELECT_SQL + " WHERE expediente = '"
+                        + expediente + "' AND documento = '" + documento + "'",
 
-				(resultSet, rowNum) -> new Registro(resultSet.getInt("id"), resultSet.getString("expediente"),
-						resultSet.getString("documento"), resultSet.getString("referenciaRepositorio"),
-						resultSet.getString("observaciones"), resultSet.getString("estado")));
-	}
+                (resultSet, rowNum) -> new Registro(
+                        resultSet.getInt("id"),
+                        resultSet.getString("expediente"),
+                        resultSet.getString("identificadorExpediente"),
+                        resultSet.getString("documento"),
+                        resultSet.getString("referenciaRepositorio"),
+                        resultSet.getString("observaciones"),
+                        resultSet.getString("estado")));
+    }
 
-	@Override
-	public void deleteAll() {
-		jdbcTemplate.execute("DELETE FROM registro");
-	}
+    @Override
+    public void deleteAll() {
+        jdbcTemplate.execute("DELETE FROM registro");
+    }
 
 }

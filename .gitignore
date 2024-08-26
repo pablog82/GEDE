@@ -7,3 +7,5 @@ database/**
 expedientes/**
 target/**
 logs/**
+.idea/**
+.vscode/**
