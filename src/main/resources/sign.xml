@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dss:SignRequest Profile="urn:afirma:dss:1.0:profile:XSS"
+                 xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                 xmlns:afxp="urn:afirma:dss:1.0:profile:XSS:schema" xmlns:ades="urn:oasis:names:tc:dss:1.0:profiles:AdES:schema#"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns:cmism="http://docs.oasis-open.org/ns/cmis/messaging/200908/"
+                 xmlns:sigpol="urn:oasis:names:tc:dss-x:1.0:profiles:SignaturePolicy:schema#"
+                 xmlns:xss="urn:oasis:names:tc:dss:1.0:profiles:XSS">
+    <dss:InputDocuments>
+        <dss:Document>
+            <dss:Base64Data>
+            </dss:Base64Data>
+        </dss:Document>
+    </dss:InputDocuments >
+    <dss:OptionalInputs>
+        <dss:ClaimedIdentity>
+            <dss:Name></dss:Name>
+        </dss:ClaimedIdentity>
+        <dss:KeySelector>
+            <ds:KeyInfo>
+                <ds:KeyName></ds:KeyName>
+            </ds:KeyInfo>
+        </dss:KeySelector>
+        <dss:SignatureType></dss:SignatureType>
+        <ades:SignatureForm></ades:SignatureForm>
+    </dss:OptionalInputs>
+</dss:SignRequest>
