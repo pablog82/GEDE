@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -262,6 +263,8 @@ public class FirmaServiceImpl implements FirmaService {
 		}
 
 	}
+	
+	
 
 	/**
 	 * Decodificar base 64.
@@ -297,4 +300,7 @@ public class FirmaServiceImpl implements FirmaService {
 		} // for i
 		return output;
 	}
+	
+	//https://stackoverflow.com/questions/47505696/itext-pdf-deferred-signing-results-in-pdf-with-invalid-signature
+
 }

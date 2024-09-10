@@ -385,7 +385,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 							FileUtils.writeByteArrayToFile(
 									new File(ficheroExpediente.getAbsolutePath().toUpperCase().replace(".PDF",
-											UUID.randomUUID().toString() + "_FIRMADO.PDF")),
+											UUID.randomUUID().toString() + "_firma.txt")),
 									EncodeDecode.decode(firmarJustificante));
 
 							// 4.5 Almacenar firmantes
