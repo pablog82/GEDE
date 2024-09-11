@@ -354,7 +354,23 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 						RespuestaGenerica respuestaAlmacenarBinario;
 						try {
-							respuestaAlmacenarBinario = almacenarBinario(ficheroExpediente);
+
+							// 4.4. Firmar
+
+							String justificanteBase64 = EncodeDecode
+									.encode(Files.readAllBytes(ficheroExpediente.toPath()));
+
+							String firmarJustificante = firmaService.firmarJustificante(justificanteBase64);
+
+//							File fileFirmaDocumento = new File(
+//									ficheroExpediente.getAbsolutePath().toUpperCase().replace(".PDF", "_FIRMADO.PDF"));
+
+							File fileFirmaDocumento = File.createTempFile("prefix-", ".PDF");
+
+							FileUtils.writeByteArrayToFile(fileFirmaDocumento, EncodeDecode.decode(firmarJustificante));
+
+							// respuestaAlmacenarBinario = almacenarBinario(ficheroExpediente);
+							respuestaAlmacenarBinario = almacenarBinario(fileFirmaDocumento);
 
 						} catch (GeneralException e) {
 							Registro registro = new Registro(expediente, identificadorExpediente, nombreDocumento,
@@ -389,33 +405,33 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 //								e.printStackTrace();
 //							}
 
-							// 4.4. Firmar
-
-							String justificanteBase64 = EncodeDecode
-									.encode(Files.readAllBytes(ficheroExpediente.toPath()));
-
-							String firmarJustificante = firmaService.firmarJustificante(justificanteBase64);
-
-							File fileFirmaDocumento = new File(ficheroExpediente.getAbsolutePath().toUpperCase()
-									.replace(".PDF", UUID.randomUUID().toString() + "_firma.pdf"));
-							FileUtils.writeByteArrayToFile(fileFirmaDocumento, EncodeDecode.decode(firmarJustificante));
-
-							// 4.5 Almacenar firmantes
-
-							intentosLlamadaAPI = 0;
-
-							try {
-								respuestaAlmacenarBinario = almacenarBinario(fileFirmaDocumento);
-								RespuestaGenerica firmaResponse = establecerFirmaDocumento(
-										responseCrearDocumento.getIdentificador(),
-										respuestaAlmacenarBinario.getIdentificador());
-							} catch (GeneralException e) {
-								Registro registro = new Registro(expediente, identificadorExpediente, nombreDocumento,
-										null, "Error al almacenar los firmantes el documento: " + e.getMessage(),
-										"ERROR");
-								registroService.insert(registro);
-								throw new GeneralException(e);
-							}
+//							// 4.4. Firmar
+//
+//							String justificanteBase64 = EncodeDecode
+//									.encode(Files.readAllBytes(ficheroExpediente.toPath()));
+//
+//							String firmarJustificante = firmaService.firmarJustificante(justificanteBase64);
+//
+//							File fileFirmaDocumento = new File(ficheroExpediente.getAbsolutePath().toUpperCase()
+//									.replace(".PDF", UUID.randomUUID().toString() + "_firma.pdf"));
+//							FileUtils.writeByteArrayToFile(fileFirmaDocumento, EncodeDecode.decode(firmarJustificante));
+//
+//							// 4.5 Almacenar firmantes
+//
+//							intentosLlamadaAPI = 0;
+//
+//							try {
+//								respuestaAlmacenarBinario = almacenarBinario(fileFirmaDocumento);
+//								RespuestaGenerica firmaResponse = establecerFirmaDocumento(
+//										responseCrearDocumento.getIdentificador(),
+//										respuestaAlmacenarBinario.getIdentificador());
+//							} catch (GeneralException e) {
+//								Registro registro = new Registro(expediente, identificadorExpediente, nombreDocumento,
+//										null, "Error al almacenar los firmantes el documento: " + e.getMessage(),
+//										"ERROR");
+//								registroService.insert(registro);
+//								throw new GeneralException(e);
+//							}
 
 							// 4.6 Cerrar documento
 							intentosLlamadaAPI = 0;

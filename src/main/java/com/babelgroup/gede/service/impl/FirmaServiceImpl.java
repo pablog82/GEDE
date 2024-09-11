@@ -205,12 +205,12 @@ public class FirmaServiceImpl implements FirmaService {
 					        afirmaSignatureFormPdf +
 					        "</ades:SignatureForm>"+
 							 "<afxp:HashAlgorithm xmlns:afxp=\"urn:afirma:dss:1.0:profile:XSS:schema\">"
-+ afirmaHashalgorithmPdf 
-+ "</afxp:HashAlgorithm> "
-+ "<afxp:AdditionalDocumentInfo xmlns:afxp='urn:afirma:dss:1.0:profile:XSS:schema'>"
-+ "<afxp:DocumentName>docPDF.pdf</afxp:DocumentName>" 
-+ "<afxp:DocumentType>pdf</afxp:DocumentType>"
-+ "</afxp:AdditionalDocumentInfo>" + 
+							 + afirmaHashalgorithmPdf 
+							+ "</afxp:HashAlgorithm> "
+							+ "<afxp:AdditionalDocumentInfo xmlns:afxp='urn:afirma:dss:1.0:profile:XSS:schema'>"
+							+ "<afxp:DocumentName>docPDF.pdf</afxp:DocumentName>" 
+							+ "<afxp:DocumentType>pdf</afxp:DocumentType>"
+							+ "</afxp:AdditionalDocumentInfo>" + 
 					        "<dss:IncludeEContent/>"+
 					    "</dss:OptionalInputs>"+
 					"</dss:SignRequest>";
