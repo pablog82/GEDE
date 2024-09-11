@@ -204,13 +204,71 @@ public class FirmaServiceImpl implements FirmaService {
 					        "<ades:SignatureForm>" +
 					        afirmaSignatureFormPdf +
 					        "</ades:SignatureForm>"+
+							 "<afxp:HashAlgorithm xmlns:afxp=\"urn:afirma:dss:1.0:profile:XSS:schema\">"
++ afirmaHashalgorithmPdf 
++ "</afxp:HashAlgorithm> "
++ "<afxp:AdditionalDocumentInfo xmlns:afxp='urn:afirma:dss:1.0:profile:XSS:schema'>"
++ "<afxp:DocumentName>docPDF.pdf</afxp:DocumentName>" 
++ "<afxp:DocumentType>pdf</afxp:DocumentType>"
++ "</afxp:AdditionalDocumentInfo>" + 
+					        "<dss:IncludeEContent/>"+
 					    "</dss:OptionalInputs>"+
 					"</dss:SignRequest>";
+			
+//			java.lang.String signDssXML = 
+//					"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+//							"<dss:SignRequest Profile=\"urn:afirma:dss:1.0:profile:XSS\" " +
+//							                 "xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" " + 
+//							                 "xmlns:afxp=\"urn:afirma:dss:1.0:profile:XSS:schema\" xmlns:ades=\"urn:oasis:names:tc:dss:1.0:profiles:AdES:schema#\" " +
+//							                 "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
+//							                 "xmlns:cmism=\"http://docs.oasis-open.org/ns/cmis/messaging/200908/\" " +
+//							                 "xmlns:sigpol=\"urn:oasis:names:tc:dss-x:1.0:profiles:SignaturePolicy:schema#\" " +
+//							                 "xmlns:xss=\"urn:oasis:names:tc:dss:1.0:profiles:XSS\">" 
+//					+ "<dss:InputDocuments xmlns:dss='urn:oasis:names:tc:dss:1.0:core:schema'>"
+//						+ "<dss:Document xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\"> "
+//						+ "<dss:Base64Data xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\">"
+//								+ justificanteRecibido 
+//							+ "</dss:Base64Data>" 
+//						+ "</dss:Document> "
+//					+ "</dss:InputDocuments> "
+//					+ "<dss:OptionalInputs xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\">"
+//						+ "<dss:ClaimedIdentity xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\">"
+//							+ "<dss:Name xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\">"
+//								+ afirmaClaimedIdentity 
+//							+ "</dss:Name>" + ""
+//						+ "</dss:ClaimedIdentity> "
+//						+ "<dss:KeySelector xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\"> "
+//								+ "<ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"> "
+//									+ "<ds:KeyName>"
+//									+ afirmaKeyName 
+//									+ "</ds:KeyName> "
+//								+ "</ds:KeyInfo>" 
+//						+ "</dss:KeySelector> "
+//						+ "<dss:SignatureType xmlns:dss=\"urn:oasis:names:tc:dss:1.0:core:schema\">"
+//							+ afirmaSignatureTypePdf 
+//							+ "</dss:SignatureType> "
+//						+ "<ades:SignatureForm xmlns:ades=\"urn:oasis:names:tc:dss:1.0:profiles:AdES:schema#\">"
+//							+ afirmaSignatureFormPdf 
+//						+ "</ades:SignatureForm> "
+//						+ "<afxp:HashAlgorithm xmlns:afxp=\"urn:afirma:dss:1.0:profile:XSS:schema\">"
+//								+ afirmaHashalgorithmPdf 
+//						+ "</afxp:HashAlgorithm> "
+//						+ "<afxp:AdditionalDocumentInfo xmlns:afxp='urn:afirma:dss:1.0:profile:XSS:schema'>"
+//							+ "<afxp:DocumentName>docPDF.pdf</afxp:DocumentName>" 
+//							+ "<afxp:DocumentType>pdf</afxp:DocumentType>"
+//						+ "</afxp:AdditionalDocumentInfo>" 
+////						+ "<sigpol:GenerateUnderSignaturePolicy>"
+////							+ "<sigpol:SignaturePolicyIdentifier>urn:oid:2.16.724.1.3.1.1.2.1.9</sigpol:SignaturePolicyIdentifier>"
+////						+ "</sigpol:GenerateUnderSignaturePolicy>" 
+//						+ "<dss:IncludeEContent/>"
+//						+ "<afxp:IgnoreGracePeriod/>" 
+//					+ " </dss:OptionalInputs> " 
+//				+ " </dss:SignRequest>";
 
 			// Se realiza la firma
 			justificanteFirmado = port.sign(signDssXML);
 
-			String xmlRetornoUTF = reemplazarCaracteresISO(justificanteFirmado);
+//			String xmlRetornoUTF = reemplazarCaracteresISO(justificanteFirmado);
 
 			DocumentBuilderFactory fabricaCreadorDocumento = DocumentBuilderFactory.newInstance();
 			fabricaCreadorDocumento.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
@@ -219,7 +277,7 @@ public class FirmaServiceImpl implements FirmaService {
 
 			creadorDocumento = fabricaCreadorDocumento.newDocumentBuilder();
 
-			Document documento = creadorDocumento.parse(new ByteArrayInputStream(xmlRetornoUTF.getBytes()));
+			Document documento = creadorDocumento.parse(new ByteArrayInputStream(justificanteFirmado.getBytes()));
 			Element raiz = documento.getDocumentElement();
 			NodeList listaContenido2 = raiz.getElementsByTagName("dss:Base64Signature");
 

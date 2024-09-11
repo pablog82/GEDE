@@ -382,12 +382,12 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 							// TODO
 
-							try {
-								emptySignature.firmar(ficheroExpediente);
-							} catch (Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+//							try {
+//								emptySignature.firmar(ficheroExpediente);
+//							} catch (Exception e) {
+//								// TODO Auto-generated catch block
+//								e.printStackTrace();
+//							}
 
 							// 4.4. Firmar
 
@@ -397,7 +397,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 							String firmarJustificante = firmaService.firmarJustificante(justificanteBase64);
 
 							File fileFirmaDocumento = new File(ficheroExpediente.getAbsolutePath().toUpperCase()
-									.replace(".PDF", UUID.randomUUID().toString() + "_firma.txt"));
+									.replace(".PDF", UUID.randomUUID().toString() + "_firma.pdf"));
 							FileUtils.writeByteArrayToFile(fileFirmaDocumento, EncodeDecode.decode(firmarJustificante));
 
 							// 4.5 Almacenar firmantes
