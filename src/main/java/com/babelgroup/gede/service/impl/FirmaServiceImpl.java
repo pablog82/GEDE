@@ -117,7 +117,7 @@ public class FirmaServiceImpl implements FirmaService {
      */
     @Override
     public String firmarJustificante(String justificanteRecibido) throws GeneralException {
-        log.info("Inicio firmarJustificante con el sello de AESA");
+        log.info("Inicio firma documento con @firma en: " + afirmaWsEndpoint);
         byte[] documentoFirmado = null;
         String respuestaFirma = "";
 
@@ -229,6 +229,8 @@ public class FirmaServiceImpl implements FirmaService {
                     "</dss:SignRequest>";
             // Se realiza la firma
             respuestaFirma = port.sign(signDssXML);
+            
+            log.info("Recibida respuesta de @firma");
 
             DocumentBuilderFactory fabricaCreadorDocumento = DocumentBuilderFactory.newInstance();
             fabricaCreadorDocumento.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
@@ -246,6 +248,7 @@ public class FirmaServiceImpl implements FirmaService {
                 String valor = item.getFirstChild().getTextContent();
                 documentoFirmado = decodificarBase64(valor);
             }
+            log.info("Fin firma documento con @firma");
             return EncodeDecode.encode(documentoFirmado);
         } catch (SOAPFaultException | SAXException | IOException | ParserConfigurationException e) {
             throw new GeneralException();
