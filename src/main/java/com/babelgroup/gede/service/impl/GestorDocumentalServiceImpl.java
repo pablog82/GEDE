@@ -290,8 +290,6 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		String expediente = directorioExpediente.getName();
 
 		try {
-
-			// TODO Revisar el formato de la carpeta
 			List<File> listadoFicherosExpediente = listFiles(directorioExpediente.getAbsolutePath());
 			if (CollectionUtils.isNotEmpty(listadoFicherosExpediente)) {
 
@@ -305,7 +303,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 							directorioExpediente, ficheroExpediente));
 
 					String nombreDocumento = ficheroExpediente.getName();
-
+					
 					// 4.1. Comprobar si está procesado
 
 					List<Registro> registros = registroService.findByExpedienteAndDocumento(expediente,
@@ -337,21 +335,18 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 							identificadorExpediente = registrosExpediente.get(0).getIdentificadorExpediente();
 						}
 
-						// 4.2. Almacenar binario
+						// 4.2 Enviar el documento a @firma y almacenar binario
 
 						intentosLlamadaAPI = 0;
 
 						RespuestaGenerica respuestaAlmacenarBinario;
 						try {
-
-							// 4.2.1 Enviar el documento a @firma
-
 							String documentoBase64 = EncodeDecode
 									.encode(Files.readAllBytes(ficheroExpediente.toPath()));
 
 							String firmarJustificante = firmaService.firmarJustificante(documentoBase64);
 
-							File fileFirmaDocumento = File.createTempFile("prefix-", ".PDF");
+							File fileFirmaDocumento = File.createTempFile("signef-", ".PDF");
 
 							FileUtils.writeByteArrayToFile(fileFirmaDocumento, EncodeDecode.decode(firmarJustificante));
 
@@ -374,7 +369,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 							responseCrearDocumento = crearDocumento(nombreDocumento,
 									respuestaAlmacenarBinario.getIdentificador(), identificadorExpediente);
 						} catch (GeneralException e) {
-							Registro registro = new Registro(expediente, identificadorExpediente, nombreDocumento, null,
+							Registro registro = new Registro(expediente, identificadorExpediente, nombreDocumento, "0",
 									"Error al crear el documento: " + e.getMessage(), "ERROR");
 							registroService.insert(registro);
 							throw new GeneralException(e);
