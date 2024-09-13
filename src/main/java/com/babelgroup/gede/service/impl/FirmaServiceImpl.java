@@ -229,6 +229,8 @@ public class FirmaServiceImpl implements FirmaService {
                     "</dss:SignRequest>";
             // Se realiza la firma
             respuestaFirma = port.sign(signDssXML);
+
+            String xmlRetornoUTF = reemplazarCaracteresISO(respuestaFirma);
             
             log.info("Recibida respuesta de @firma");
 
@@ -239,7 +241,7 @@ public class FirmaServiceImpl implements FirmaService {
 
             creadorDocumento = fabricaCreadorDocumento.newDocumentBuilder();
 
-            Document documento = creadorDocumento.parse(new ByteArrayInputStream(respuestaFirma.getBytes()));
+            Document documento = creadorDocumento.parse(new ByteArrayInputStream(xmlRetornoUTF.getBytes()));
             Element root = documento.getDocumentElement();
             NodeList dssBase64Signature = root.getElementsByTagName("dss:Base64Signature");
 
@@ -254,9 +256,24 @@ public class FirmaServiceImpl implements FirmaService {
             throw new GeneralException();
         }
 
+    }	/**
+     * Reemplazar caracteres ISO.
+     *
+     * @param input the input
+     * @return the string
+     */
+    private static String reemplazarCaracteresISO(String input) {
+        // Cadena de caracteres original a sustituir.
+        String original = "áàäéèëíìïóòöúùüñÁÀÄÉÈËÍÌÏÓÒÖÚÙÜÑçÇ";
+        // Cadena de caracteres ASCII que reemplazarán los originales.
+        String ascii = "aaaeeeiiiooouuunAAAEEEIIIOOOUUUNcC";
+        String output = input;
+        for (int i = 0; i < original.length(); i++) {
+            // Reemplazamos los caracteres especiales.
+            output = output.replace(original.charAt(i), ascii.charAt(i));
+        } // for i
+        return output;
     }
-
-
     /**
      * Decodificar base 64.
      *
