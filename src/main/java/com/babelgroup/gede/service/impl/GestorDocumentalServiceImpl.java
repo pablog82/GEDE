@@ -203,6 +203,9 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	@Value("${gede.alta.documento.firma}")
 	private Boolean firmar;
 
+	@Value("${gede.api.documentos.crear.nombre}")
+	private String nombreDocumentoHistorico;
+
 	@Value("${gede.api.expedientes.crear.nombre}")
 	private String nombreExpedienteHistorico;
 
@@ -317,6 +320,9 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 						String identificadorExpediente = null;
 
+						String nombreNaturalExpediente = MessageFormat.format(nombreExpedienteHistorico,
+								numeroExpediente);
+
 						if (registrosExpediente.isEmpty()) {
 							// 4.2. Crear expediente
 							intentosLlamadaAPI = 0;
@@ -359,8 +365,11 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 						DocumentoResponse responseCrearDocumento;
 						try {
+							
+							Integer contadorDocumento = split.length > 2 ? Integer.parseInt(split[2].substring(0, split[2].indexOf("."))) : 1;
+							
 							responseCrearDocumento = crearDocumento(nombreDocumento,
-									respuestaAlmacenarBinario.getIdentificador(), identificadorExpediente);
+									respuestaAlmacenarBinario.getIdentificador(), identificadorExpediente, numeroExpediente, contadorDocumento);
 						} catch (GeneralException e) {
 							Registro registro = new Registro(expediente, identificadorExpediente, nombreDocumento, "0",
 									"Error al crear el documento: " + e.getMessage(), "ERROR");
@@ -557,13 +566,17 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	 * @return the documento response
 	 * @throws GeneralException the general exception
 	 */
-	private DocumentoResponse crearDocumento(String nombreDocumento, String idBinario, String identificadorExpediente)
+	private DocumentoResponse crearDocumento(String nombreDocumento, String idBinario, String identificadorExpediente, String numeroExpediente, Integer contadorDocumento)
 			throws GeneralException {
 		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_JSON);
 		HttpEntity<DatosAltaDocumentoRequest> requestEntity;
 
+		
+		String nombreNaturalDocumento = MessageFormat.format(nombreDocumentoHistorico,
+				numeroExpediente, contadorDocumento);
+		
 		DatosAltaDocumentoRequest datosAlta = generarDatosAltaDocumento(nombreDocumento, idBinario,
-				identificadorExpediente);
+				identificadorExpediente, nombreNaturalDocumento);
 
 		requestEntity = new HttpEntity<>(datosAlta, headers);
 
@@ -579,7 +592,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 			} else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
 				intentosLlamadaAPI++;
 				log.info("crearDocumento() - Error al llamar a la API - Reintento " + intentosLlamadaAPI);
-				return crearDocumento(nombreDocumento, idBinario, identificadorExpediente);
+				return crearDocumento(nombreDocumento, idBinario, identificadorExpediente, numeroExpediente, contadorDocumento);
 			} else {
 				throw new GeneralException(
 						"crearDocumento() - Error al llamar a la API - Superado número de reintentos: "
@@ -599,18 +612,19 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 		// Metadatos
 		List<Metadato> metadatos = new ArrayList<Metadato>();
-		
-		
-		String nombreNaturalExpediente = MessageFormat.format(nombreExpedienteHistorico, nombreExpediente);
+
+		// String nombreNaturalExpediente =
+		// MessageFormat.format(nombreExpedienteHistorico, nombreExpediente);
 		String numeroExpediente = MessageFormat.format(numeroExpedienteHistorico, idExpediente);
-		
-		metadatos.add(new Metadato("nombreNaturalExpediente", new String[] { nombreNaturalExpediente }));
+
+		metadatos.add(new Metadato("nombreNaturalExpediente", new String[] { nombreExpediente }));
 		metadatos.add(new Metadato("formatoExpediente", new String[] { formato }));
 		metadatos.add(new Metadato("idoc:field_22_9", new String[] { organo }));
 		metadatos.add(new Metadato("idoc:field_22_4", new String[] { gedeOrganismo }));
 		metadatos.add(new Metadato("idExpediente", new String[] { numeroExpediente }));
 		metadatos.add(new Metadato("idoc:field_22_13", new String[] { numeroExpediente }));// TODO Mes año
 		metadatos.add(new Metadato("serieExpediente", new String[] { serieDocumenal }));
+		metadatos.add(new Metadato("codigoExpediente", new String[] { numeroExpediente }));
 
 		datosAlta.setMetadatos(metadatos);
 		return datosAlta;
@@ -624,7 +638,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	 * @return the datos alta documento request
 	 */
 	private DatosAltaDocumentoRequest generarDatosAltaDocumento(String nombreDocumento, String idBinario,
-			String identificadorExpediente) {
+			String identificadorExpediente, String nombreNaturalDocumento) {
 		DatosAltaDocumentoRequest datosAlta = new DatosAltaDocumentoRequest();
 		datosAlta.setDeposito(deposito);
 		datosAlta.setIdentificadorExpediente(identificadorExpediente);
@@ -648,7 +662,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		metadatos.add(new Metadato("idoc:field_23_6", new String[] { estadoElaboracion }));
 		metadatos.add(new Metadato("accesibilidadDocumento", new String[] { accesibilidadDocumento }));
 		metadatos.add(new Metadato("formatoDocumento", new String[] { formato }));
-		metadatos.add(new Metadato("nombreNaturalDocumento", new String[] { nombreDocumento }));
+		metadatos.add(new Metadato("nombreNaturalDocumento", new String[] { nombreNaturalDocumento }));
 		metadatos.add(new Metadato("idoc:field_23_8",
 				new String[] { "http://administracionelectronica.gob.es/ENI/XSD/v1.0/documento-e" }));
 
@@ -709,3 +723,4 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		return directories;
 	}
 }
+
