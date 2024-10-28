@@ -128,15 +128,6 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	@Value("${gede.api.documentos.crear}")
 	private String gedeApiDocumentosCrear;
 
-	@Value("${gede.api.documentos.establecer.firma}")
-	private String gedeApiDocumentosEstablecerFirma;
-
-	/**
-	 * The gede api binarios.
-	 */
-	@Value("${gede.api.documentos.cerrar}")
-	private String gedeApiDocumentosCerrar;
-
 	@Value("${gede.api.expedientes.crear}")
 	private String gedeApiExpedientesCrear;
 
@@ -212,9 +203,11 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	@Value("${gede.alta.documento.firma}")
 	private Boolean firmar;
 
-	@Value("${gede.alta.documento.binario.tamanio.maximo}")
-	private Integer tamanioMaximoBinario;
+	@Value("${gede.api.expedientes.crear.nombre}")
+	private String nombreExpedienteHistorico;
 
+	@Value("${gede.api.expedientes.crear.numero}")
+	private String numeroExpedienteHistorico;
 	/**
 	 * The firma service.
 	 */
@@ -303,7 +296,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 							directorioExpediente, ficheroExpediente));
 
 					String nombreDocumento = ficheroExpediente.getName();
-					
+
 					// 4.1. Comprobar si está procesado
 
 					List<Registro> registros = registroService.findByExpedienteAndDocumento(expediente,
@@ -606,12 +599,17 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 		// Metadatos
 		List<Metadato> metadatos = new ArrayList<Metadato>();
-		metadatos.add(new Metadato("nombreNaturalExpediente", new String[] { nombreExpediente }));
+		
+		
+		String nombreNaturalExpediente = MessageFormat.format(nombreExpedienteHistorico, nombreExpediente);
+		String numeroExpediente = MessageFormat.format(numeroExpedienteHistorico, idExpediente);
+		
+		metadatos.add(new Metadato("nombreNaturalExpediente", new String[] { nombreNaturalExpediente }));
 		metadatos.add(new Metadato("formatoExpediente", new String[] { formato }));
 		metadatos.add(new Metadato("idoc:field_22_9", new String[] { organo }));
 		metadatos.add(new Metadato("idoc:field_22_4", new String[] { gedeOrganismo }));
-		metadatos.add(new Metadato("idExpediente", new String[] { idExpediente }));
-		metadatos.add(new Metadato("idoc:field_22_13", new String[] { idExpediente }));// TODO Mes año
+		metadatos.add(new Metadato("idExpediente", new String[] { numeroExpediente }));
+		metadatos.add(new Metadato("idoc:field_22_13", new String[] { numeroExpediente }));// TODO Mes año
 		metadatos.add(new Metadato("serieExpediente", new String[] { serieDocumenal }));
 
 		datosAlta.setMetadatos(metadatos);
