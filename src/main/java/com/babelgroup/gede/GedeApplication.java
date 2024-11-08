@@ -59,26 +59,8 @@ public class GedeApplication implements CommandLineRunner {
 	 */
 	@Override
 	public void run(String... args) throws Exception {
-
-//		Registro r1 = new Registro("EXP012023", "DOC001", UUID.randomUUID().toString(), "OBS01", 1);
-//		Registro r2 = new Registro("EXP022023", "DOC002", UUID.randomUUID().toString(), "OBS02", 2);
-//		Registro r3 = new Registro("EXP032023", "DOC003", UUID.randomUUID().toString(), "OBS03", 3);
-//		Registro r4 = new Registro("EXP042023", "DOC004", UUID.randomUUID().toString(), "OBS04", 4);
-//		Registro r5 = new Registro("EXP052023", "DOC005", UUID.randomUUID().toString(), "OBS05", 5);
-
 		registroService.deleteAll();
-
-		/*
-		 * registroService.insert(r1); registroService.insert(r2);
-		 * registroService.insert(r3); registroService.insert(r4);
-		 * registroService.insert(r5);
-		 */
-
 		gestorDocumentalService.subirDocumentos();
-
-//		List<Registro> registros = registroService.findAll();
-//		registros.forEach(System.out::println);
-
 	}
 
 	/**
