@@ -10,10 +10,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.babelgroup</groupId>
-    <artifactId>gede</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <artifactId>gede-importer</artifactId>
+    <version>1.0.0</version>
     <name>gede</name>
-    <description>Demo project for Spring Boot</description>
+    <description>Aplicación para cargar ficheros PDF de expedientes en GEDE</description>
     <properties>
         <java.version>1.8</java.version>
         <cxf.version>3.5.5</cxf.version>
@@ -171,7 +171,7 @@
     </dependencies>
 
     <build>
-        <!-- <resources>
+        <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <excludes>
@@ -180,8 +180,7 @@
                 </excludes>
                 <filtering>false</filtering>
             </resource>
-        </resources>-->
-
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

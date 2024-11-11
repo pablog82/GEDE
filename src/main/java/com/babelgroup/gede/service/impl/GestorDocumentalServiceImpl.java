@@ -85,9 +85,6 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
     @Value("${gede.api.expedientes.crear}")
     private String gedeApiExpedientesCrear;
 
-    @Value("${fase}")
-    private Integer fase;
-
     @Value("${gede.alta.documento.deposito}")
     private String deposito;
 
@@ -120,9 +117,6 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
     @Value("${gede.alta.documento.serie}")
     private String serieDocumenal;
-
-    @Value("${gede.alta.documento.firma}")
-    private Boolean firmar;
 
     @Value("${gede.api.documentos.crear.nombre}")
     private String nombreDocumentoHistorico;
@@ -285,7 +279,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
                         // 5 Registar en base de datos
                         Registro registro = new Registro(expediente, identificadorExpediente, nombreDocumento,
                                 responseCrearDocumento.getIdentificador(), "Documento almacenado",
-                                "OK - [firmado: " + firmar + "]");
+                                "OK - [firmado: OK]");
                         registroService.insert(registro);
                     } else {
                         log.info("Ya se ha procesado el documento");
@@ -546,24 +540,9 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
      */
     private List<File> listDirectories(String directory) throws IOException {
         List<File> directories = new ArrayList<File>();
-        switch (this.fase) {
-            case 0: // Sólo un directorio raiz con todos los documentos colocados ahí
-                File diretoryFile = new File(directory);
-                if (diretoryFile.isDirectory()) {
-                    directories.add(diretoryFile);
-                }
-                break;
-            case 1: // Directorio raíz con múltiples directorios (uno por expediente) y documentos
-                // en cada directorio
-                File[] files = new File(directory).listFiles();
-                for (File file : Objects.requireNonNull(files)) {
-                    if (file.isDirectory()) {
-                        directories.add(file);
-                    }
-                }
-                break;
-            default:
-                break;
+        File diretoryFile = new File(directory);
+        if (diretoryFile.isDirectory()) {
+            directories.add(diretoryFile);
         }
         return directories;
     }
