@@ -10,7 +10,6 @@ import lombok.ToString;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @ToString
 public class TicketResponse {
 	private Boolean exito;
@@ -24,4 +23,17 @@ public class TicketResponse {
 	private Boolean valido;
 	private String identificadorUsuario;
 	private String nombreCompleto;
+
+	public TicketResponse(Boolean exito, List<String> errores, Integer codigoRespuesta, String ticket, String usuario, String organismo, Date caducidad, Boolean valido, String identificadorUsuario, String nombreCompleto) {
+		this.exito = exito;
+		this.errores = errores;
+		this.codigoRespuesta = codigoRespuesta;
+		this.ticket = ticket;
+		this.usuario = usuario;
+		this.organismo = organismo;
+		this.caducidad = caducidad;
+		this.valido = valido;
+		this.identificadorUsuario = identificadorUsuario;
+		this.nombreCompleto = nombreCompleto;
+	}
 }
