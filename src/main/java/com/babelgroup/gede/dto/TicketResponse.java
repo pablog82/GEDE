@@ -14,7 +14,6 @@ import lombok.ToString;
 @ToString
 public class TicketResponse {
 	private Boolean exito;
-
 	private List<String> errores;
 	private Integer codigoRespuesta;
 	private String ticket;
