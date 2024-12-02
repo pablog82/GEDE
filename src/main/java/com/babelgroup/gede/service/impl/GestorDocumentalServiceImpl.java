@@ -9,6 +9,7 @@ import java.util.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -242,19 +243,32 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 						intentosLlamadaAPI = 0;
 
+//						RespuestaGenerica respuestaAlmacenarBinario;
+//						try {
+//							String documentoBase64 = EncodeDecode
+//									.encode(Files.readAllBytes(ficheroExpediente.toPath()));
+//
+//							String firmarJustificante = firmaService.firmarJustificante(documentoBase64);
+//
+//							File fileFirmaDocumento = File.createTempFile("signef-", ".PDF");
+//
+//							FileUtils.writeByteArrayToFile(fileFirmaDocumento, EncodeDecode.decode(firmarJustificante));
+//
+//							// 3.3 Almacenar el fichero firmado
+//							respuestaAlmacenarBinario = almacenarBinario(fileFirmaDocumento);
+//
+//						} catch (GeneralException e) {
+//							Registro registro = new Registro(expediente, identificadorExpediente, nombreDocumento,
+//									"error", "Error al almacenar el binario: " + e.getMessage(), "ERROR");
+//							registroService.insert(registro);
+//							throw new GeneralException(e);
+//						}
+						
 						RespuestaGenerica respuestaAlmacenarBinario;
 						try {
-							String documentoBase64 = EncodeDecode
-									.encode(Files.readAllBytes(ficheroExpediente.toPath()));
-
-							String firmarJustificante = firmaService.firmarJustificante(documentoBase64);
-
-							File fileFirmaDocumento = File.createTempFile("signef-", ".PDF");
-
-							FileUtils.writeByteArrayToFile(fileFirmaDocumento, EncodeDecode.decode(firmarJustificante));
 
 							// 3.3 Almacenar el fichero firmado
-							respuestaAlmacenarBinario = almacenarBinario(fileFirmaDocumento);
+							respuestaAlmacenarBinario = almacenarBinario(ficheroExpediente);
 
 						} catch (GeneralException e) {
 							Registro registro = new Registro(expediente, identificadorExpediente, nombreDocumento,
@@ -270,7 +284,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 						DocumentoResponse responseCrearDocumento;
 						try {
 
-							Integer contadorDocumento = split.length > 2
+							Integer contadorDocumento = split.length > 2 && (StringUtils.isNotEmpty(split[2].substring(0, split[2].indexOf("."))))
 									? Integer.parseInt(split[2].substring(0, split[2].indexOf(".")))
 									: 1;
 
