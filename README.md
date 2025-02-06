@@ -1,6 +1,25 @@
 # Importador de documentos a GEDE
 
-Este proyecto permite importar documentos escaneados en PDF a GEDE usando su API Rest
+Este proyecto permite importar documentos escaneados en PDF a GEDE usando su API Rest.
+
+*Nota*: Este proceso se apoya en una base de datos SQLite para llevar un control de los expedientes procesados y evitar duplicados.
+
+El proceso de importación se realiza de la siguiente forma:
+
+- Se leen los documentos PDF de un directorio con un formato específico.
+- Se procesa el nombre para extrer el número de expediente y se comprueba si no existe en la base de datos SQLite.
+- Si no existe, se crea el expediente en GEDE y se guarda en la base de datos SQLite.
+- ~~Se firma el documento PDF con el sello electrónico de la entidad.~~ **(Pendiente revisar si se mantiene esta funcionalidad, actualmente deshabilitada)**
+- Se suben el binario del documentoa GEDE.
+- Se crea el documento en GEDE.
+- Se guarda el registro del procesado en la base de datos SQLite.
+
+
+## Requisitos
+
+### Entorno de desarrollo
+- Java 17 o superior
+- Maven 3.6.3 o superior
 
 ## Configuracion
 
@@ -58,6 +77,20 @@ afirma.ws.signaturetypepdf = urn:afirma:dss:1.0:profile:XSS:forms:PAdES
 
 ## Ejecución
 
+
+La aplicación se compila en formato jar ejecutable y requiere ser ejecutada con ___Java 17 o superior___
+
+Para ejecutar la aplicación,  desde línea de comandos se invocará la siguiente comando:
+
 ```bash
- java -jar gede-0.0.1-SNAPSHOT.jar
+java -jar gede-importer-1.0.0.jar --spring.config.location=./config/
 ```
+En la misma carpeta que el ejecutable, se ubicará la carpeta config con dos ficheros: gede.properties y afirma.properties
+donde están las propiedades que se deben configurar por entorno tal como se indica anteriomente.
+
+Una vez ejecutada la aplicación se generará un fichero `gede-importer.log` con los detalles de la ejecución, así como un fichero `gede-importer.db`
+con los registros en una base de datos SQLite de los ficheros procesados. 
+
+Estos dos ficheros pueden usarse para revisar el proceso y ver posibles errores durante la ejecución del mismo.
+
+
