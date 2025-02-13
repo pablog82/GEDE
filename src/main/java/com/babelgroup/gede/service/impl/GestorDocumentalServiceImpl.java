@@ -502,7 +502,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
         String numeroExpediente = MessageFormat.format(numeroExpedienteHistorico, idExpediente);
 
         metadatos.add(new Metadato("nombreNaturalExpediente", new String[]{nombreExpediente}));
-        metadatos.add(new Metadato("formatoExpediente", new String[]{formato}));
+        metadatos.add(new Metadato("soporteExpediente", new String[]{formato}));
         metadatos.add(new Metadato("idoc:field_22_9", new String[]{organo}));
         metadatos.add(new Metadato("idoc:field_22_4", new String[]{gedeOrganismo}));
         metadatos.add(new Metadato("idExpediente", new String[]{numeroExpediente}));
@@ -545,7 +545,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
         metadatos.add(new Metadato("idoc:field_23_4", new String[]{origen}));
         metadatos.add(new Metadato("idoc:field_23_6", new String[]{estadoElaboracion}));
         metadatos.add(new Metadato("accesibilidadDocumento", new String[]{accesibilidadDocumento}));
-        metadatos.add(new Metadato("formatoDocumento", new String[]{formato}));
+        metadatos.add(new Metadato("soporteDocumento", new String[]{formato}));
         metadatos.add(new Metadato("nombreNaturalDocumento", new String[]{nombreNaturalDocumento}));
         metadatos.add(new Metadato("idoc:field_23_8",
                 new String[]{"http://administracionelectronica.gob.es/ENI/XSD/v1.0/documento-e"}));
