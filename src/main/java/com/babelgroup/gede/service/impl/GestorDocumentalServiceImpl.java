@@ -231,7 +231,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
                         if (registrosExpediente.isEmpty()) {
                             // 3.1.1 Crear expediente
                             intentosLlamadaAPI = 0;
-                            ExpedienteResponse expedienteResponse = crearExpediente(numeroExpediente, numeroExpediente,
+                            ExpedienteResponse expedienteResponse = crearExpediente(nombreNaturalExpediente, numeroExpediente,
                                     numeroExpediente, numeroExpediente);
 
                             identificadorExpediente = expedienteResponse.getIdentificador();
