@@ -23,6 +23,7 @@ public class Registro {
                     String estado) {
         super();
         this.expediente = expediente;
+        this.identificadorExpediente = identificadorExpediente;
         this.documento = documento;
         this.referenciaRepositorio = referenciaRepositorio;
         this.observaciones = observaciones;

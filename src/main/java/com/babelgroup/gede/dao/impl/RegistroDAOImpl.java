@@ -41,7 +41,7 @@ public class RegistroDAOImpl implements RegistroDAO {
     @Override
     public int insert(Registro registro) {
         log.info("Insertando registro: " + registro.toString());
-        Object[] params = {registro.getExpediente(), registro.getDocumento(), registro.getReferenciaRepositorio(),
+        Object[] params = {registro.getExpediente(), registro.getIdentificadorExpediente(), registro.getDocumento(), registro.getReferenciaRepositorio(),
                 registro.getObservaciones(), registro.getEstado()};
 
         int[] types = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER};
