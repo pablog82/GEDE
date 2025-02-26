@@ -188,7 +188,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
     private void listarFicherosExpedientes(File directorioExpediente) throws GeneralException {
         log.info(MessageFormat.format(PASO_2_LISTAR_FICHEROS_EN_LA_CARPETA, directorioExpediente));
 
-        String expediente = directorioExpediente.getName();
+        //String expediente = directorioExpediente.getName();
 
         try {
             List<File> listadoFicherosExpediente = listFiles(directorioExpediente.getAbsolutePath());
@@ -204,20 +204,21 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
                             directorioExpediente, ficheroExpediente));
 
                     String nombreDocumento = ficheroExpediente.getName();
+                    
+                    // Obetener el numero de expediente
+                    String nombreFichero = ficheroExpediente.getName();
 
+                    String[] split = nombreFichero.split("-");
+
+                    String numeroExpediente = split[1];
+                    
                     // 3.1. Comprobar si está procesado
 
-                    List<Registro> registros = registroService.findByExpedienteAndDocumento(expediente,
+                    List<Registro> registros = registroService.findByExpedienteAndDocumento(numeroExpediente,
                             nombreDocumento);
 
                     if (registros.isEmpty()) {
 
-                        // Obetener el numero de expediente
-                        String nombreFichero = ficheroExpediente.getName();
-
-                        String[] split = nombreFichero.split("-");
-
-                        String numeroExpediente = split[1];
 
                         // Comprobar si no se creo ya
 
@@ -272,11 +273,14 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
                             respuestaAlmacenarBinario = almacenarBinario(ficheroExpediente);
 
                         } catch (GeneralException e) {
-                            Registro registro = new Registro(expediente, identificadorExpediente, nombreDocumento,
+                            Registro registro = new Registro(numeroExpediente, identificadorExpediente, nombreDocumento,
                                     "error", "Error al almacenar el binario: " + e.getMessage(), "ERROR");
                             registroService.insert(registro);
-                            throw new GeneralException(e);
+                            //throw new GeneralException(e);
+                            log.info("Error al almacenar el binario para el documento {}: {}", nombreDocumento, e.getMessage());
+                            continue;
                         }
+                        
 
                         intentosLlamadaAPI = 0;
 
@@ -293,14 +297,14 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
                                     respuestaAlmacenarBinario.getIdentificador(), identificadorExpediente,
                                     numeroExpediente, contadorDocumento);
                         } catch (GeneralException e) {
-                            Registro registro = new Registro(expediente, identificadorExpediente, nombreDocumento, "0",
+                            Registro registro = new Registro(numeroExpediente, identificadorExpediente, nombreDocumento, "0",
                                     "Error al crear el documento: " + e.getMessage(), "ERROR");
                             registroService.insert(registro);
                             throw new GeneralException(e);
                         }
 
                         // 5 Registar en base de datos
-                        Registro registro = new Registro(expediente, identificadorExpediente, nombreDocumento,
+                        Registro registro = new Registro(numeroExpediente, identificadorExpediente, nombreDocumento,
                                 responseCrearDocumento.getIdentificador(), "Documento almacenado",
                                 "OK - [firmado: OK]");
                         registroService.insert(registro);
