@@ -44,7 +44,7 @@ public class RegistroDAOImpl implements RegistroDAO {
         Object[] params = {registro.getExpediente(), registro.getIdentificadorExpediente(), registro.getDocumento(), registro.getReferenciaRepositorio(),
                 registro.getObservaciones(), registro.getEstado()};
 
-        int[] types = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER};
+        int[] types = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER};
         return this.jdbcTemplate.update(INSERT_SQL, params, types);
     }
 

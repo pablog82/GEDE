@@ -274,7 +274,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 									"error", "Error al almacenar el binario: " + e.getMessage(), "ERROR");
 							registroService.insert(registro);
 //							throw new GeneralException(e);
-							log.error("Error al almacenar el binario para el documento {}: {}", nombreDocumento,
+							log.info("Error al almacenar el binario para el documento {}: {}", nombreDocumento,
 									e.getMessage());
 							continue; // Continúa con el siguiente fichero en la iteración
 						}
