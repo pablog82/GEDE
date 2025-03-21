@@ -207,9 +207,43 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 					// Obtener el numero de expediente
 					String nombreFichero = ficheroExpediente.getName();
 
-					String[] split = nombreFichero.split("-");
 
-					String numeroExpediente = split[1];
+					String[] split;
+                    String identificadorExpedientepru = null;
+                    String numeroExpediente = null;
+                    //String tipoDocumentoMetadato = tipoDocumento;
+                    String nombreApellidos = "";
+                    String dni = "";
+                    String textoSecuencial;
+
+                    boolean formatoGuion = true;
+
+                    String tipoDocumentoOriginal = tipoDocumento;
+
+					if (nombreDocumento.contains("#")) {
+						//formato con #
+
+                    	formatoGuion = false;
+
+                        split = nombreDocumento.split("#");
+                        numeroExpediente = split[1];
+
+                        if (split.length >= 5) {
+
+                        	tipoDocumento = split[2];
+                            dni = split[3];
+                            nombreApellidos = split[4];
+                            //textoSecuencial = split[5].split("\\.")[0];
+                        }
+
+					}
+					else{
+						//formato con guiones
+						split = nombreFichero.split("-");
+
+						numeroExpediente = split[1];
+					}
+
 
 					// 3.1. Comprobar si está procesado
 					List<Registro> registros = registroService.findByExpedienteAndDocumento(numeroExpediente,
@@ -230,7 +264,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 							// 3.1.1 Crear expediente
 							intentosLlamadaAPI = 0;
 							ExpedienteResponse expedienteResponse = crearExpediente(nombreNaturalExpediente,
-									numeroExpediente, numeroExpediente, numeroExpediente);
+									numeroExpediente, numeroExpediente, numeroExpediente, nombreApellidos, dni);
 
 							identificadorExpediente = expedienteResponse.getIdentificador();
 						} else {
@@ -286,10 +320,17 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 						DocumentoResponse responseCrearDocumento;
 						try {
 
-							Integer contadorDocumento = split.length > 2
-									&& (StringUtils.isNotEmpty(split[2].substring(0, split[2].indexOf("."))))
-											? Integer.parseInt(split[2].substring(0, split[2].indexOf(".")))
-											: 1;
+                        	Integer contadorDocumento;
+                        	if(formatoGuion) {
+                        		contadorDocumento = split.length > 2 && (StringUtils.isNotEmpty(split[2].substring(0, split[2].indexOf("."))))
+                                    ? Integer.parseInt(split[2].substring(0, split[2].indexOf(".")))
+                                    : 1;
+                        	}
+                        	else {
+                        		contadorDocumento = split.length > 5 && (StringUtils.isNotEmpty(split[5].substring(0, split[5].indexOf("."))))
+                                        ? Integer.parseInt(split[5].substring(0, split[5].indexOf(".")))
+                                        : 1;
+                        	}
 
 							responseCrearDocumento = crearDocumento(nombreDocumento,
 									respuestaAlmacenarBinario.getIdentificador(), identificadorExpediente,
@@ -309,6 +350,9 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 					} else {
 						log.info("Ya se ha procesado el documento");
 					}
+
+					// RESTAURAMOS el valor original
+					tipoDocumento = tipoDocumentoOriginal;
 
 				}
 			} else {
@@ -414,12 +458,12 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		}
 	}
 
-	private ExpedienteResponse crearExpediente(String nombreExpediente, String idExpediente, String mes, String anyo)
+	private ExpedienteResponse crearExpediente(String nombreExpediente, String idExpediente, String mes, String anyo, String nombreApellidos, String dni)
 			throws GeneralException {
 		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_JSON);
 		HttpEntity<DatosAltaExpedienteRequest> requestEntity;
 
-		DatosAltaExpedienteRequest datosAlta = generarDatosAltaExpediente(nombreExpediente, idExpediente, mes, anyo);
+		DatosAltaExpedienteRequest datosAlta = generarDatosAltaExpediente(nombreExpediente, idExpediente, mes, anyo, nombreApellidos, dni);
 
 		requestEntity = new HttpEntity<>(datosAlta, headers);
 
@@ -435,7 +479,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 			} else if (HttpStatus.UNAUTHORIZED.equals(response.getStatusCode()) && intentosLlamadaAPI < 3) {
 				intentosLlamadaAPI++;
 				log.info("crearExpediente() - Error al llamar a la API - Reintento {}", intentosLlamadaAPI);
-				return crearExpediente(nombreExpediente, idExpediente, mes, anyo);
+				return crearExpediente(nombreExpediente, idExpediente, mes, anyo, nombreApellidos, dni);
 			} else {
 				throw new GeneralException(
 						"crearExpediente() - Error al llamar a la API - Superado número de reintentos: "
@@ -492,7 +536,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	}
 
 	private DatosAltaExpedienteRequest generarDatosAltaExpediente(String nombreExpediente, String idExpediente,
-			String mes, String anyo) {
+			String mes, String anyo, String nombreApellidos, String dni) {
 		DatosAltaExpedienteRequest datosAlta = new DatosAltaExpedienteRequest();
 		datosAlta.setDeposito(deposito);
 		datosAlta.setTipoDocumental(tipoDocumentalExpediente);
@@ -511,6 +555,12 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 		metadatos.add(new Metadato("idoc:field_22_13", new String[] { numeroExpediente }));
 		metadatos.add(new Metadato("serieExpediente", new String[] { serieDocumenal }));
 		metadatos.add(new Metadato("codigoExpediente", new String[] { numeroExpediente }));
+
+        // Nuevos metadatos
+        if (StringUtils.isNotEmpty(nombreApellidos) && StringUtils.isNotEmpty(dni)) {
+        	metadatos.add(new Metadato("idoc:field_22_1", new String[]{nombreApellidos + " (" + dni + ")"}));
+            metadatos.add(new Metadato("idoc:field_22_8", new String[]{dni}));
+        }
 
 		datosAlta.setMetadatos(metadatos);
 		return datosAlta;
