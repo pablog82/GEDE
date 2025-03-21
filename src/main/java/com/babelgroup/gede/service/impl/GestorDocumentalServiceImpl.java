@@ -320,16 +320,16 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 						DocumentoResponse responseCrearDocumento;
 						try {
 
-                        	Integer contadorDocumento;
+                        	String contadorDocumento;
                         	if(formatoGuion) {
                         		contadorDocumento = split.length > 2 && (StringUtils.isNotEmpty(split[2].substring(0, split[2].indexOf("."))))
-                                    ? Integer.parseInt(split[2].substring(0, split[2].indexOf(".")))
-                                    : 1;
+                                    ? split[2].substring(0, split[2].indexOf("."))
+                                    : "1";
                         	}
                         	else {
                         		contadorDocumento = split.length > 5 && (StringUtils.isNotEmpty(split[5].substring(0, split[5].indexOf("."))))
-                                        ? Integer.parseInt(split[5].substring(0, split[5].indexOf(".")))
-                                        : 1;
+                                        ? split[5].substring(0, split[5].indexOf("."))
+                                        : "1";
                         	}
 
 							responseCrearDocumento = crearDocumento(nombreDocumento,
@@ -499,7 +499,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	 * @throws GeneralException the general exception
 	 */
 	private DocumentoResponse crearDocumento(String nombreDocumento, String idBinario, String identificadorExpediente,
-			String numeroExpediente, Integer contadorDocumento) throws GeneralException {
+			String numeroExpediente, String contadorDocumento) throws GeneralException {
 		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_JSON);
 		HttpEntity<DatosAltaDocumentoRequest> requestEntity;
 
