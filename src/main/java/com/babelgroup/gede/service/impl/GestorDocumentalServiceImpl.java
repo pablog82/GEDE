@@ -286,10 +286,10 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 						DocumentoResponse responseCrearDocumento;
 						try {
 
-							Integer contadorDocumento = split.length > 2
+							String contadorDocumento = split.length > 2
 									&& (StringUtils.isNotEmpty(split[2].substring(0, split[2].indexOf("."))))
-											? Integer.parseInt(split[2].substring(0, split[2].indexOf(".")))
-											: 1;
+											? split[2].substring(0, split[2].indexOf("."))
+											: "1";
 
 							responseCrearDocumento = crearDocumento(nombreDocumento,
 									respuestaAlmacenarBinario.getIdentificador(), identificadorExpediente,
@@ -455,7 +455,7 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 	 * @throws GeneralException the general exception
 	 */
 	private DocumentoResponse crearDocumento(String nombreDocumento, String idBinario, String identificadorExpediente,
-			String numeroExpediente, Integer contadorDocumento) throws GeneralException {
+			String numeroExpediente, String contadorDocumento) throws GeneralException {
 		HttpHeaders headers = cabeceraConTicket(MediaType.APPLICATION_JSON);
 		HttpEntity<DatosAltaDocumentoRequest> requestEntity;
 
