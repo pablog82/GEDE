@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.time.Instant;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -128,6 +129,9 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 	@Value("${gede.api.expedientes.crear.numero}")
 	private String numeroExpedienteHistorico;
+	
+	@Value("${gede.separador.fichero}")
+	private String separadorFichero;
 
 	@Autowired
 	private FirmaService firmaService;
@@ -220,15 +224,15 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
                     String tipoDocumentoOriginal = tipoDocumento;
 
-					if (nombreDocumento.contains("#")) {
+					if (nombreDocumento.contains(separadorFichero)) {
 						//formato con #
 
                     	formatoGuion = false;
 
-                        split = nombreDocumento.split("#");
+                        split = nombreDocumento.split(Pattern.quote(separadorFichero));
                         numeroExpediente = split[1];
 
-                        if (split.length >= 5) {
+                        if (split.length == 6) {
 
                         	tipoDocumento = split[2];
                             dni = split[3];
