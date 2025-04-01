@@ -60,6 +60,15 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
 	private static final String INICIO_DEL_PROCESO_DE_DOCUMENTOS = "-- INICIO DEL PROCESO DE DOCUMENTOS ---";
 
+	private static final List<String> TIPOS_DOCUMENTO_VALIDOS = Arrays.asList(
+		    "TD01", "TD02", "TD03", "TD04", "TD05", //Documentos de decisión
+		    "TD06", "TD07", "TD08", "TD09", //Documentos de transmisión
+		    "TD10", "TD11", "TD12", //Documentos de constancia
+		    "TD13", //Documentos de juicio
+		    "TD14", "TD15", "TD16", "TD17", "TD18", "TD19", "TD20", //Documentos de ciudadano
+		    "TD99" //Otros
+		);
+
 	@Value("${dir.expedientes}")
 	private String dirExpedientes;
 
@@ -230,9 +239,22 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
 
                         if (split.length > 5) {
 
-                        	tipoDocumento = split[2];
-                            dni = split[3];
+                        	tipoDocumento = split[2].toUpperCase();
+                        	dni = split[3];
                             nombreApellidos = split[4];
+
+//                            if (!TIPOS_DOCUMENTO_VALIDOS.contains(tipoDocumento)) {
+//                                log.info("Tipo de documento no permitido: {}. Se omite el fichero: {}", tipoDocumento, nombreDocumento);
+//                                Registro registro = new Registro(numeroExpediente, null, nombreDocumento, "error",
+//                                    "Tipo de documento no permitido: " + tipoDocumento, "ERROR");
+//                                registroService.insert(registro);
+//                                continue;
+//                            }
+
+                            if (!TIPOS_DOCUMENTO_VALIDOS.contains(tipoDocumento)) {
+                                log.info("Tipo de documento no válido detectado: {}. Se usará TD99 para el fichero: {}", tipoDocumento, nombreDocumento);
+                                tipoDocumento = "TD99";
+                            }
                             //textoSecuencial = split[5].split("\\.")[0];
                         }
 
