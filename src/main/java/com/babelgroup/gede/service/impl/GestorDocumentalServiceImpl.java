@@ -243,14 +243,6 @@ public class GestorDocumentalServiceImpl implements GestorDocumentalService {
                         	dni = split[3];
                             nombreApellidos = split[4];
 
-//                            if (!TIPOS_DOCUMENTO_VALIDOS.contains(tipoDocumento)) {
-//                                log.info("Tipo de documento no permitido: {}. Se omite el fichero: {}", tipoDocumento, nombreDocumento);
-//                                Registro registro = new Registro(numeroExpediente, null, nombreDocumento, "error",
-//                                    "Tipo de documento no permitido: " + tipoDocumento, "ERROR");
-//                                registroService.insert(registro);
-//                                continue;
-//                            }
-
                             if (!TIPOS_DOCUMENTO_VALIDOS.contains(tipoDocumento)) {
                                 log.info("Tipo de documento no válido detectado: {}. Se usará TD99 para el fichero: {}", tipoDocumento, nombreDocumento);
                                 tipoDocumento = "TD99";
